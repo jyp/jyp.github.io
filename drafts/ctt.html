@@ -106,7 +106,7 @@ succ n = λα z s. s (n α z s)</code></pre>
 <pre><code>  Γ ⊢ A : ∀i. U                                           Γ ⊢ s : A@0
   Γ ⊢ s : A@0                                             Γ ⊢ t : A@1
   Γ ⊢ t : A@1                 Γ ⊢ t : ∀i. A               Γ ⊢ u : s←–A–→t
-–––––––––––––––––– path  –––––––––––––––––––––––––– in  –––––––––––––––––––––––– line
+–––––––––––––––––– path  –––––––––––––––––––––––––– in  –––––––––––––––––––––––––––––––– line
  Γ ⊢  s←–A–→t : U         Γ ⊢  t! : t@0←–&lt;i&gt;A–→t@1       Γ ⊢ (s,t,u) : (A@0,A@1,s←–A–→t)</code></pre>
 <p>The formation rule says that a path type over the line type A is well formed if the borders have the borders of A as types. The introduction says that from any line, one can get a path between its borders. The elimination rule says that any path can be completed to a full line.</p>
 <p>Conversion rules:</p>
@@ -114,7 +114,7 @@ succ n = λα z s. s (n α z s)</code></pre>
 (s,t,u)@1     = t
 (s,t,u)!      = u
 (s,t,u!)      = u
-(A,B,s←–R–→t) = R -- attn! subtyping</code></pre>
+(A,B,s←–R–→t) = R</code></pre>
 <p>In my opinion, the main interest of this theory is that path relations behave extensionally. Indeed, for any two functions <code>f</code> and <code>g</code> of type <code>(X:A) → B</code>, we have:</p>
 <pre><code>q : (x:A) → (y:A) → (p : x←–&lt;i&gt;A–→y) → f x ←–&lt;i&gt;B–→g x
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -144,7 +144,7 @@ p : R a b
 <h1 id="extensionality">Extensionality</h1>
 <pre><code> Γ ⊢ t : A@0
  Γ ⊢ A : ∀i. U
-–––––––––––––––––––
+––––––––––––––––––– lifting
  Γ ⊢ t↑A : ∀i. A@i</code></pre>
 <p>This gives both the coercion and the coherence components of OTT, all at once. With the same assumptions:</p>
 <pre><code>coe t A : A@1
@@ -152,50 +152,83 @@ coe t A = (t↑A)@0
 
 coh t A : t←–A–→coe t A
 coh t A = (t↑A)!</code></pre>
-<p>The conversion rules for <code>↑</code> work by case analysis on the second argument (the line type).</p>
-<pre><code>A    ↑ &lt;i&gt;U            =  &lt;i&gt;A
-s    ↑ &lt;i&gt;((x:A) → B)  =  &lt;i&gt;λx. (s x@0 ↑ B)@i
-t    ↑ &lt;i&gt;∀j.A         =  &lt;i&gt;&lt;j&gt;(t@j ↑ &lt;i&gt;A)@i
-u    ↑ &lt;i&gt;(s←–A–→t)    =  &lt;i&gt;((s[0/i],t[0/i],u)↑&lt;i&gt;∀j.A@j)@i!</code></pre>
-<p>(Additionally <code>(t ↑ A)@0 = t</code>)</p>
-<p>Note that we have no satisfactory conversion for <code>&lt;i&gt;(_,_,ΨR)</code>. Parametricity is a-priori not compatible with</p>
+<p>Thus, using the above, we can conveniently construct a substitution principle for paths. Here it is:</p>
 <pre><code>x : A
 y : A
 p : x←–&lt;i&gt;A–→y
 P : A → U
 q : P x
-–––––––––––––––– subst
-? : P y</code></pre>
-<p><code>? = (q ↑ (&lt;i&gt;P (x,y,p)@i))@1</code></p>
-<p>Splice in univalence:</p>
-<h1 id="univalence">Univalence</h1>
+––––––––––––––––––––––––––––– subst
+coe q (&lt;i&gt;P (x,y,p)@i) : P y</code></pre>
+<p>The conversion rules for <code>↑</code> are:</p>
+<ol style="list-style-type: decimal">
+<li><code>(t ↑ A)@0 = t</code></li>
+<li>A case analysis on the second argument (the line type):</li>
+</ol>
+<pre><code>A    ↑ &lt;i&gt;U            =  &lt;i&gt;A
+s    ↑ &lt;i&gt;((x:A) → B)  =  &lt;i&gt;λx. (s x@0 ↑ B)@i
+t    ↑ &lt;i&gt;∀j.A         =  &lt;i&gt;&lt;j&gt;(t@j ↑ &lt;i&gt;A)@i</code></pre>
+<p>I leave out two cases.</p>
+<ol style="list-style-type: decimal">
+<li><p>Arbitrary relations (ΨR). Indeed, there is no way to use an arbitrary relation R as a lifting. So parametricity is not miscible with extensionality.</p></li>
+<li><p>Paths (s←–A–→t). This is somewhat trickier; but there is a-priori no way to compute the lifting of a path along another path. Consider: <code>u ↑    &lt;i&gt;((s0,s1,s)@i←–&lt;j&gt;A@i@j–→(t0,t1,t)@i)</code>. We have:</p></li>
+</ol>
+<pre><code>u  : s0 ←–&lt;j&gt;A@0@j–→ t0
+s  : s0 ←–&lt;i&gt;A@i@0–→ s1
+t  : t0 ←–&lt;i&gt;A@i@1–→ t1</code></pre>
+<p>or, in a diagram:</p>
+<pre><code>
+s0 &lt;-------- s ----------&gt; s1
+^
+|
+|
+u
+|
+|
+v
+t0 &lt;-------- t ----------&gt; t1
+</code></pre>
+<p>What we have to do is to construct 1. a path from <code>s1</code> to <code>t1</code> 2. the interior of the square</p>
+<p>Leaving out the interior for now, an obvious way to build the path <code>s1</code> to <code>t1</code> is to compose the other paths. However, knowing nothing about the structure of paths, this leaves us no the wiser.</p>
+<h1 id="ott">OTT</h1>
+<p>A possible choice is to assume the uniqueness of paths. If paths are equality proofs, then this assumption is also known as the uniqueness of identity proofs (UIP) or Axiom K. In our framework, we can assert that a path is always constructed using <code>!</code>, and thus if the two ends of a line are equal (say <code>x</code>), we can replace the path by <code>(&lt;i&gt;x)!</code>. So, we have:</p>
+<pre><code>(x,x,_) = (x,x,(&lt;i&gt;x)!) = &lt;i&gt;x</code></pre>
+<h1 id="isos">Isos</h1>
+<p>If we do not want UIP, a popular choice is to allow isomorphisms to generate paths. This situation is intermediate between parametricity and UIP. I don’t really know how to define isomorphism without resorting to an underlying notion of equality, so I’ll just take the parametricity case and add exactly the needed requirements to be able to do lifting.</p>
 <pre><code>Γ ⊢ A : U
 Γ ⊢ B : U
 Γ ⊢ R : A → B → U
 Γ ⊢ f : A → B
-Γ ⊢ f' : B → A
-Γ ⊢ g  : (x:A) → R x (f x)
-Γ ⊢ g' : (x:B) → R (f x) x
+Γ ⊢ g : B → A
+Γ ⊢ p : (x:A) → R x (f x)
+Γ ⊢ q : (x:B) → R (g x) x
 –––––––––––––––––––––––––––
-Γ ⊢ ⟨R,f,g,f',g'⟩ : A←–&lt;i&gt;U–→B</code></pre>
+Γ ⊢ ⟨R,f,g,p,q⟩ : A←–&lt;i&gt;U–→B</code></pre>
 <p>with</p>
 <p><code>a←–(_,_,⟨R,_,_,_,_⟩)–→b = R a b</code></p>
-<p>and</p>
-<pre><code>s ↑ (_,_,⟨R,f,g⟩)  =  (s, f s, g s)</code></pre>
-<h1 id="semivalence">Semi–valence</h1>
-<pre><code>Γ ⊢ A : U
-Γ ⊢ B : U
-Γ ⊢ R : A → B → U
-Γ ⊢ f : A → B
-Γ ⊢ g : (x:A) → R x (f x)
-–––––––––––––––––––––––––––
-Γ ⊢ ⟨R,f,g⟩ : A←–&lt;i&gt;U–→B</code></pre>
-<p>with</p>
-<p><code>a←–(_,_,⟨R,f,g⟩)–→b = R a b</code></p>
-<p>and</p>
-<pre><code>s ↑ (_,_,⟨R,f,g⟩)  =  (s, f s, g s)</code></pre>
-<h1 id="acks">Acks</h1>
-<p>Conor McBride pointed me an issue with symmetry.</p>
+<p>We can lift using the above, like so:</p>
+<pre><code>s ↑ (_,_,⟨R,f,_,p,_⟩)  =  (s, f s, p s)</code></pre>
+<p>We can also compose the so-constructed paths:</p>
+<pre><code>⟨R2,f2,g2,p2,q2⟩ ∘ ⟨R1,f1,g1,p1,q1⟩ =
+  ⟨R2∘R1,f2∘f1,g1∘g2,(p2 (f1 x),p1 x),(q1 (g2 x),q2 x)⟩  =</code></pre>
+<p>where <code>(R∘S) x y = ∃z.  R x z × S z y</code></p>
+<p>We can then explain how to complete the square.</p>
+<p>B &lt;——– R1 ———-&gt; A ^ | | R2 | | v C &lt;——– R3 ———-&gt; D</p>
+<ol style="list-style-type: decimal">
+<li><p>The path A to D is R3 ∘ R2 ∘ R1.</p></li>
+<li><p>The interior of the square is a type-path, with</p></li>
+</ol>
+<ul>
+<li>A = R2</li>
+<li>B = R3 ∘ R2 ∘ R1</li>
+<li>R = full relation</li>
+<li>For f, we have to tuple up the witnesses of the relations for each of the three sides</li>
+<li>For g, we discard the irrelevant components of the tuple</li>
+<li>p and q are trivial.</li>
+</ul>
+<p>This whole process allows to reduce the lifting of paths</p>
+<h1 id="acknowledgement">Acknowledgement</h1>
+<p>Conor McBride pointed out an error in an eariler version of this sketch.</p>
 
         </div>
         <div id="footer">
