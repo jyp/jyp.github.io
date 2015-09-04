@@ -103,18 +103,16 @@ succ n = λα z s. s (n α z s)</code></pre>
 <p>Remark: in reality, the rules so far say nothing about lines or cubes. They admit models that only talk about an abstract notion of names. I posit that, if we were to omit the designated special names 0 and 1, the type-theory so far should be quite useful to represent nominal objects.</p>
 <h1 id="my-cubical-type-theory">(My) Cubical Type Theory</h1>
 <p>As I see it, the main interest of cubical type-theory is to group objects (<code>a</code>,<code>b</code>) with a useful relation <code>p</code> between them by placing <code>a</code> and <code>b</code> at the borders of a line and <code>p</code> in the interior. In such a situation we will say that <code>p</code> is a path between <code>a</code> and <code>b</code>. Here are my rules for path formation, introduction and elimination.</p>
-<pre><code>  Γ ⊢ A : ∀i. U                                           Γ ⊢ s : A@0
-  Γ ⊢ s : A@0                                             Γ ⊢ t : A@1
-  Γ ⊢ t : A@1                 Γ ⊢ t : ∀i. A               Γ ⊢ u : s←–A–→t
-–––––––––––––––––– path  –––––––––––––––––––––––––– in  –––––––––––––––––––––––––––––––– line
- Γ ⊢  s←–A–→t : U         Γ ⊢  t! : t@0←–&lt;i&gt;A–→t@1       Γ ⊢ (s,t,u) : (A@0,A@1,s←–A–→t)</code></pre>
+<pre><code>  Γ ⊢ A : ∀i. U                                           Γ ⊢ t : A@0
+  Γ ⊢ t : A@0                 Γ ⊢ t : ∀i. A               Γ ⊢ u : s←–A–→t
+–––––––––––––––––– path  –––––––––––––––––––––––––– in  ––––––––––––––––––––––– line
+ Γ ⊢  A–→t : U             Γ ⊢  t! : (&lt;i&gt;A)–→t@0         Γ ⊢ (t,u) : ∀i. A@i</code></pre>
 <p>The formation rule says that a path type over the line type A is well formed if the borders have the borders of A as types. The introduction says that from any line, one can get a path between its borders. The elimination rule says that any path can be completed to a full line.</p>
 <p>Conversion rules:</p>
-<pre><code>(s,t,u)@0     = s
-(s,t,u)@1     = t
-(s,t,u)!      = u
-(s,t,u!)      = u
-(A,B,s←–R–→t) = R</code></pre>
+<pre><code>(s,u)@0     = s
+(t,u)!      = u
+(t,u!)      = u
+(A,R–→t)    = TODO</code></pre>
 <p>In my opinion, the main interest of this theory is that path relations behave extensionally. Indeed, for any two functions <code>f</code> and <code>g</code> of type <code>(X:A) → B</code>, we have:</p>
 <pre><code>q : (x:A) → (y:A) → (p : x←–&lt;i&gt;A–→y) → f x ←–&lt;i&gt;B–→g x
 –––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
@@ -124,12 +122,11 @@ succ n = λα z s. s (n α z s)</code></pre>
 <h1 id="parametricity">Parametricity</h1>
 <p>Given the above base, we can easily internalise parametricity. We need the ability to turn any relation into a path between the types that it relates. (That may seem strange to those used to CTT; however, remember at this point that our notion of path is rather weak, in particular they do not have substitutivity.)</p>
 <pre><code>Γ ⊢ A : U
-Γ ⊢ B : U
-Γ ⊢ R : A → B → U
+Γ ⊢ P : A → U
 ––––––––––––––––––––
-Γ ⊢ ΨR : A←–&lt;i&gt;U–→B</code></pre>
+Γ ⊢ ΨP : (&lt;i&gt;U)–→A</code></pre>
 <p>The conversion rule says that a witness for the relation is a proper inhabitant of such a path:</p>
-<p><code>a←–(_,_,ΨR)–→b = R a b</code></p>
+<p><code>(_,ΨR)–→a = R a</code></p>
 <p>A consequence is that every parametricity theorem is provable within the theory. (The proof of this fact appears <a href="http://www.cse.chalmers.se/~mouling/share/PresheafModelParametericTT.pdf">here</a>; using a somewhat different syntax.) For good measure I will give an example: the proof of parametricity for the identity function type:</p>
 <pre><code>f : (a:U) → a -&gt; a
 A : U
@@ -165,9 +162,10 @@ coe q (&lt;i&gt;P (x,y,p)@i) : P y</code></pre>
 <li><code>(t ↑ A)@0 = t</code></li>
 <li>A case analysis on the second argument (the line type):</li>
 </ol>
-<pre><code>A    ↑ &lt;i&gt;U            =  &lt;i&gt;A
-s    ↑ &lt;i&gt;((x:A) → B)  =  &lt;i&gt;λx. (s x@0 ↑ B)@i
-t    ↑ &lt;i&gt;∀j.A         =  &lt;i&gt;&lt;j&gt;(t@j ↑ &lt;i&gt;A)@i</code></pre>
+<pre><code>A    ↑ &lt;i&gt;U                      =  &lt;i&gt;A
+s    ↑ &lt;i&gt;((x:A) → B)            =  &lt;i&gt;λx. (s x@0 ↑ &lt;i&gt;B)@i
+u    ↑ &lt;i&gt;(&lt;j&gt;A@i@j–→(s0,s)@i)   =  &lt;i&gt;(&lt;j&gt;((s0,u) ↑ &lt;i&gt; A@i@j)@i)!
+</code></pre>
 <p>I leave out two cases.</p>
 <ol style="list-style-type: decimal">
 <li><p>Arbitrary relations (ΨR). Indeed, there is no way to use an arbitrary relation R as a lifting. So parametricity is not miscible with extensionality.</p></li>
@@ -213,7 +211,15 @@ t0 &lt;-------- t ----------&gt; t1
   ⟨R2∘R1,f2∘f1,g1∘g2,(p2 (f1 x),p1 x),(q1 (g2 x),q2 x)⟩  =</code></pre>
 <p>where <code>(R∘S) x y = ∃z.  R x z × S z y</code></p>
 <p>We can then explain how to complete the square.</p>
-<p>B &lt;——– R1 ———-&gt; A ^ | | R2 | | v C &lt;——– R3 ———-&gt; D</p>
+<pre><code>B &lt;-------- R1 ----------&gt; A
+^
+|
+|
+R2
+|
+|
+v
+C &lt;-------- R3 ----------&gt; D</code></pre>
 <ol style="list-style-type: decimal">
 <li><p>The path A to D is R3 ∘ R2 ∘ R1.</p></li>
 <li><p>The interior of the square is a type-path, with</p></li>
