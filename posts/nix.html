@@ -85,6 +85,14 @@
 <p>In the above <code>-a</code> means “all” and <code>-P</code> means to print the attribute names as well. The <code>-A</code> attribute is necessary for haskell packages, as they are not visible by default (this choice baffles me too).</p>
 <p>Go ahead and install all the stuff you need. You should not suffer any problems with package dependencies, because the nixpkgs maintainers take care to offer a set of packages which are mutually compatible.</p>
 <p>As far as I understand, automatic builds of nixpkgs are performed. Build problems are reported to the nixpkgs maintainers, and so should be eventually fixed. So, using nixpkgs gives pretty good guarantees compared to plain cabal, even though issues might temporarily sneak in.</p>
+<h2 id="a-quirk">A quirk</h2>
+<p>In order to support the <code>ghc-paths</code> library (<code>ghc-mod</code> depends on it), you need to add the following variables to your environment:</p>
+<pre><code>NIX_GHC_VERSION=$(ghc --numeric-version)
+export NIX_GHC=&quot;$HOME/.nix-profile/bin/ghc&quot;
+export NIX_GHCPKG=&quot;$HOME/.nix-profile/bin/ghc-pkg&quot;
+export NIX_GHC_DOCDIR=&quot;$HOME/.nix-profile/share/doc/ghc/html&quot;
+export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;</code></pre>
+<p>Why the need for this? In the works of Peter Simons: “The problem with that [<code>ghc-paths</code>] is fundamentally based on the assumption that there is <em>one</em> GHC and all libraries are installed into its lib directory – an assumption Nix doesn’t fulfill. We try to remedy that issue by patching <code>ghc-paths</code> so that it returns the contents of those environment variables above instead of hard-coded (incorrect) values.</p>
 <h2 id="upgrading">Upgrading</h2>
 <p>Eventually you’ll want to upgrade your stuff. If this is the first time you read this HOWTO, skip this section.</p>
 <p>Optionally, start by cleaning the old versions that you have installed.</p>
@@ -143,9 +151,17 @@
 <pre><code>cd my/repo/project
 cabal2nix . &gt; default.nix</code></pre></li>
 <li><p>Create the package descriptions of the packages you depend on, using <code>cabal2nix</code>, as described above. In this example I assume that they reside in the <code>nix</code> subdirectory of your repo.</p></li>
-<li><p>Create a <code>shell.nix</code> file with the following contents:</p>
-<p>let pkgs = (import <nixpkgs> {}); haskellPackages = pkgs.recurseIntoAttrs(pkgs.haskellPackages.override { overrides = self: super: let callPackage = self.callPackage; in { # pretty-compact = callPackage ./local/pretty-compact.nix {}; thisPackage = callPackage (import ./default.nix) {}; }; }); in haskellPackages.thisPackage.env</p></li>
+<li><p>Create a <code>shell.nix</code> file with the following contents:</p></li>
 </ol>
+<pre><code>let pkgs = (import &lt;nixpkgs&gt; {});
+    haskellPackages = pkgs.recurseIntoAttrs(pkgs.haskellPackages.override {
+        overrides = self: super:
+        let callPackage = self.callPackage; in {
+              # pretty-compact = callPackage ./local/pretty-compact.nix {};
+              thisPackage = callPackage (import ./default.nix) {};
+        };
+       });
+in haskellPackages.thisPackage.env</code></pre>
 <p>Assuming a fixed version of nixpkgs, the above describes a reproducible build environment. (One could also fix the version of nixpkgs. I leave this as an exercise to the reader. Yet, tracking the nixpkgs is not necessarily a bad idea, as you may want to eventually push your package to nixpkgs.)</p>
 <p>You can then use the above to build your package. Type:</p>
 <pre><code> nix-shell --pure</code></pre>
