@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title></title>
+<!-- 2015-11-11 Wed 12:09 -->
+<meta  charset="utf-8" />
+<meta  htto-equiv="X-UA-Compatible" content="chrome=1" />
+<meta  name="generator" content="Org-mode with org-ioslide" />
+<meta  name="author" content="Jean-Philippe Bernardy" />
+
+
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">-->
+<!--<meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--This one seems to work all the time, but really small on ipad-->
+<!--<meta name="viewport" content="initial-scale=0.4">-->
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<link rel="stylesheet" media="all" href="theme/css/default.css" />
+<link rel="stylesheet" media="only screen and (max-device-width: 480px)" href="theme/css/phone.css" />
+<link rel="stylesheet" media="all" href="theme/css/small-icon.css" />
+<base target="_blank"> <!-- This amazingness opens all links in a new tab. -->
+<script data-main="js/slides" src="js/require-1.0.8.min.js"></script>
+
+   <script src="js/jquery-1.7.1.min.js" type="text/javascript"></script>
+
+<script src="js/mathjax/MathJax.js?config=TeX-AMS-MML_HTMLorMML,local/local" type="text/javascript"></script>
+</head>
+<body style="opacity: 0">
+<slides class="layout-widescreen">
+<slide class="title-slide segue nobackground">
+       <aside class="gdbar"><img src="clipart/seagate-green-stacked.jpg"></aside>
+       <!-- The content of this hgroup is replaced programmatically through the slide_config.json. -->
+       <hgroup class="auto-fadein">
+         <h1 data-config-title><!-- populated from slide_config.json --></h1>
+         <h2 data-config-subtitle><!-- populated from slide_config.json --></h2>
+         <p data-config-presenter><!-- populated from slide_config.json --></p>
+       </hgroup>
+    </slide>
+  
+<slide id="sec-1"  >
+<hgroup class="">
+       <h2 class=" ">Function shipping: Aim</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-1">
+<blockquote>
+<p>
+The aim of the 2.2d task is to research and develop ubiquitous caching
+and function <b>shipping concepts</b> and apply them to percipient storage
+architecture.
+</p>
+</blockquote>
+
+<p>
+Function shipping
+</p>
+<ul>
+<li>the capability to execute data-processing operations directly on storage nodes
+</li>
+<li>"move the computation to the data"
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-2"  >
+<hgroup class="">
+       <h2 class=" ">Outline</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-2">
+<ul>
+<li>Enumerate possible approaches to function shipping
+</li>
+<li>Look at how the choice of approach influences the API
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="clipart/seagate-green-stacked.jpg"></aside><hgroup class="">
+       <h2 class=" ">Approach A: Middleware-Level</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-3">
+
+<p>
+Delegate function shipping to Flink
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-3-1"  >
+<hgroup class="">
+       <h2 class=" ">Flink</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-1">
+<blockquote>
+<p>
+Apache Flink is a platform for efficient, distributed, general-purpose
+data processing. It features powerful programming abstractions in Java
+and Scala, a high-performance run-time, and automatic program
+optimisation. It has native support for iterations, incremental
+iterations, and programs consisting of large DAGs of operations.
+</p>
+</blockquote>
+
+<ul>
+<li>Flink <b>already</b> provides a form of function shipping
+</li>
+<li>Flink is supported by a SAGE partner (DFKI)
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-2"  >
+<hgroup class="">
+       <h2 class=" ">Function Shipping in Flink</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-2">
+<p>
+A middleware such as Flink (or Spark, &#x2026;) features function shipping
+mechanisms.
+</p>
+
+<article class="flexbox vcenter">
+
+<div class="figure">
+<p><img src="./clipart/ClientJmTm.svg" alt="ClientJmTm.svg" width="60%" />
+</p>
+</div>
+</article>
+
+<aside class="note">
+  <section>
+<p>
+Applications written on top of Flink are:
+</p>
+
+<ol>
+<li>Specified using a High-Level API
+</li>
+<li>Compiled to JVM code
+</li>
+<li><b>JVM code is distributed around the cluster</b>
+</li>
+<li>Scheduled to balance the computation load
+</li>
+</ol>
+
+  </section>
+</aside>
+
+
+<p>
+but: the JobManager does <b>not</b> take data locality into account.
+</p>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-3-3"  >
+<hgroup class="">
+       <h2 class=" ">Flink components</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-3">
+<article class="flexbox vcenter">
+
+<div class="figure">
+<p><img src="./clipart/stack.svg" alt="stack.svg" width="80%" />
+</p>
+</div>
+</article>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-4"  >
+<hgroup class="">
+       <h2 class=" ">Flink over Mero (1)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-4">
+<article class="flexbox vcenter">
+
+<div class="figure">
+<p><img src="./clipart/stack+mero.svg" alt="stack+mero.svg" width="80%" />
+</p>
+</div>
+</article>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-5"  >
+<hgroup class="">
+       <h2 class=" ">Flink over Mero (2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-5">
+<p>
+Idea:
+</p>
+<ul>
+<li>Leverage the function shipping features of Flink
+</li>
+<li>have Mero merely expose a minimal API to <b>expose the location</b> of the
+data
+</li>
+<li>Modify Flink to take data location into account
+<ul>
+<li>so that it schedules tasks in nodes that store the data
+</li>
+<li>access to Mero data (a Flink "Connector")
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-6"  >
+<hgroup class="">
+       <h2 class=" ">Pros</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-6">
+<ul>
+<li>Reuse the distribution mechanisms that are already implemented, and
+covering much of the requirements.
+</li>
+<li>Already well-documented APIs
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-7"  >
+<hgroup class="">
+       <h2 class=" ">Cons (1)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-7">
+<ul>
+<li>Breaking the abstraction barrier. In principle Mero should make the
+location of data abstract.
+<ul>
+<li>Data may be moved while Flink is accessing it.
+There is a risk that performance drops drastically in this situation.
+</li>
+<li>Mero (may choose to) implement striping, and therefore the load may
+be distributed across nodes in blocks that are small
+(relatively to what Flink typically expects)
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-3-8"  >
+<hgroup class="">
+       <h2 class=" ">Cons (2)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-3-8">
+<ul>
+<li>Flink features a checkpoint-based fault-recovery mechanism
+<ul>
+<li>May be sufficient to support many workloads
+</li>
+<li>Not good enough for exascale (near certainty of failure)
+</li>
+<li>Fixable?
+</li>
+</ul>
+</li>
+<li>Increased runtime overheads due to moving data up/down the software stack
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-4" class=" segue dark quote nobackground" style="background-image: url(nil)">
+<aside class="gdbar right bottom"><img src="clipart/seagate-green-stacked.jpg"></aside><hgroup class="">
+       <h2 class=" ">Approach B: System-Level</h2>
+       <h3></h3>
+       </hgroup>
+<article class="flexbox vleft auto-fadein" id="text-4">
+
+<p>
+Support function shipping within Mero
+</p>
+
+
+</article>
+
+</slide>
+<slide id="sec-4-1"  >
+<hgroup class="">
+       <h2 class=" ">Background: FOPs in Mero</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-1">
+<ul>
+<li>a Mero node runs one or several processes (localities) that schedule and run FOPs
+</li>
+<li>FOPs are small programs taking care of IO operations
+</li>
+</ul>
+
+<p>
+Very efficient:
+</p>
+
+<ul>
+<li>Context-switches are very cheap. FOPs are implemented as explicit
+state machines.
+</li>
+<li>The FOP/FOM scheduler is optimised for IO operations.
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-4-2"  >
+<hgroup class="">
+       <h2 class=" ">Shipping Functions as FOPs</h2>
+       <h3></h3>
+       </hgroup>
+<article class="larger" id="text-4-2">
+
+<article class="flexbox vcenter">
+<p>
+Idea: generalise FOPs so that they do not only perform IO-related
+functions, but <b>also run computations</b>.
+</p>
+</article>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-4-3"  >
+<hgroup class="">
+       <h2 class=" ">Advantages compared to middleware</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-3">
+<ul>
+<li>Speed
+<ul>
+<li>In particular for random-access loads (many context switches)
+</li>
+<li>Example: traversals of non-indexed trees (<code>find</code>) or graphs; generation
+of index
+</li>
+</ul>
+</li>
+
+<li>Separation of concerns
+<ul>
+<li>The responsibility of the location of data is with Mero. Data can
+be moved without issue.
+</li>
+<li>Location info does not leak
+</li>
+</ul>
+</li>
+
+<li>Potential to Reuse Mero components (failure-recovery, overcommit,
+transaction manager, &#x2026;)
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+
+</slide>
+<slide id="sec-4-4"  >
+<hgroup class="">
+       <h2 class=" ">Deployment of Functions (as FOPs)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-4">
+<p>
+Given the above approach, every new application may require new FOPs
+to be deployed on Mero nodes. Two approaches are possible
+</p>
+
+<ul>
+<li>Static deployment
+</li>
+<li>Dynamic deployment
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+<slide id="sec-4-4-1"  >
+<hgroup class="">
+       <h2 class=" ">B.1 Static deployment</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-4-1">
+<p>
+Deployment is done by
+</p>
+<ol>
+<li>Extending the Mero source code with a new FOP
+</li>
+<li>Re-compile and re-deploy Mero on the cluster
+</li>
+</ol>
+
+<p>
+Evaluation
+</p>
+<ul>
+<li>Pro: no additional infrastructure
+</li>
+<li>Con: inconvenient (inflexible) for application writers
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-4-4-2"  >
+<hgroup class="">
+       <h2 class=" ">B.2 Dynamic deployment</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-4-2">
+<p>
+Idea:
+</p>
+<ul>
+<li>Let the application provide its own code to ship
+</li>
+<li>have Mero perform the shipping
+</li>
+</ul>
+
+<p>
+Option:
+</p>
+<ul>
+<li>Decouple the code-distribution mechanism from the offloading
+mechanism.
+</li>
+<li>Have a directory of functions shared across the Mero cluster
+</li>
+<li>Saves resources when lot of code is shipped
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-4-5"  >
+<hgroup class="">
+       <h2 class=" ">Code (language) options</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-5">
+<ul>
+<li>x86 machine code
+</li>
+<li>Special-Purpose bytecode
+</li>
+<li>JVM, or other existing VM.
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+<slide id="sec-4-5-1"  >
+<hgroup class="">
+       <h2 class=" ">B.2.i x86 machine code</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-5-1">
+<ul>
+<li>Pro: the code executed is as fast as possible
+</li>
+<li>Con: fixing the architecture
+</li>
+<li>Con: Running arbitrary application-specific code within Mero internals is
+dangerous. Therefore some protection
+mechanism must be implemented, either:
+<ul>
+<li>a static analysis of the code. This analysis would check that the
+code only performs safe operations.
+</li>
+<li>a dynamic system based on address-space separation. This would
+require Mero to run in protected mode. Difficult to
+arrange if the service runs as a user (not kernel).
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-4-5-2"  >
+<hgroup class="">
+       <h2 class=" ">B.2.ii Special-Purpose bytecode</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-4-5-2">
+<ul>
+<li>Pros:
+<ul>
+<li>Secure. Restricted to permitted operations only.
+</li>
+<li>Allows for the cluster to contain a mix of architectures.
+</li>
+</ul>
+</li>
+<li>Con: Runtime overhead to interpret the bytecode.
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-5"  >
+<hgroup class="">
+       <h2 class=" ">A vs. B: Summary</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-5">
+<table border="2" cellspacing="0" cellpadding="6" rules="groups" frame="hsides">
+
+
+<colgroup>
+<col  class="left" />
+
+<col  class="left" />
+
+<col  class="left" />
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="left">Criterion</th>
+<th scope="col" class="left">A. Middleware</th>
+<th scope="col" class="left">B. System</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="left">Implementation effort</td>
+<td class="left highlight">Reasonable</td>
+<td class="left">Higher</td>
+</tr>
+
+<tr>
+<td class="left">Data-Location</td>
+<td class="left">Transparent</td>
+<td class="left highlight">Encapsulated</td>
+</tr>
+
+<tr>
+<td class="left">Performance (Latency)</td>
+<td class="left">Acceptable</td>
+<td class="left highlight">Better</td>
+</tr>
+
+<tr>
+<td class="left">Reliability</td>
+<td class="left">Acceptable</td>
+<td class="left highlight">Better</td>
+</tr>
+
+<tr>
+<td class="left">Application Language</td>
+<td class="left">JVM</td>
+<td class="left highlight">Custom</td>
+</tr>
+
+<tr>
+<td class="left">Deployment</td>
+<td class="left highlight">Easy</td>
+<td class="left">Custom</td>
+</tr>
+
+<tr>
+<td class="left">API</td>
+<td class="left">Given</td>
+<td class="left">TBD</td>
+</tr>
+</tbody>
+</table>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-6"  >
+<hgroup class="">
+       <h2 class=" ">APIs</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6">
+<p>
+There is a choice of abstraction level.
+</p>
+
+<p>
+From low to high-level:
+</p>
+<ul>
+<li>x86/VM
+</li>
+<li>Extended MPI-style active storage
+</li>
+<li>Functional (flink-style)
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+<slide id="sec-6-1"  >
+<hgroup class="">
+       <h2 class=" ">x86/VM</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-1">
+<ul>
+<li>Most general
+</li>
+<li>Difficult to use
+</li>
+<li>Need to precisely define the API that Mero will make accessible
+<ul>
+<li>A big task in itself
+</li>
+</ul>
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide id="sec-6-2"  >
+<hgroup class="">
+       <h2 class=" ">MPI Extension (Active-Storage-style)</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-2">
+<ul>
+<li>Provide a number of given kernels
+</li>
+<li>Special-purpose API (MPI extension)
+</li>
+</ul>
+
+
+</article>
+
+</slide>
+<slide id="sec-6-2-1"  >
+<hgroup class="">
+       <h2 class=" ">Example</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-2-1">
+<p>
+Before:
+</p>
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="c">
+MPI_File_read_at(fh, offset, tmp, n,MPI_DOUBLE, &amp;status);
+for (i=0; i &lt; n; i++)
+    sum += tmp[i];
+</pre>
+
+</div>
+
+<p>
+Active-Storage-style:
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="c">
+MPI_Info_set(info, "USE_Accelerator", "TRUE");
+MPIX_File_read_ex(...,info, MPI_DOUBLE, SUM, &amp;status);
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+
+</slide>
+<slide id="sec-6-3"  >
+<hgroup class="">
+       <h2 class=" ">Flink-style</h2>
+       <h3></h3>
+       </hgroup>
+<article class="" id="text-6-3">
+<ul>
+<li>High-level API
+</li>
+<li>Compiled to efficient code
+</li>
+<li>Kernels distributed at "run-time"
+</li>
+</ul>
+
+<p>
+Example:
+</p>
+
+<div class="org-src-container">
+
+<pre class="prettyprint" data-lang="scala">
+val text = env.readTextFile("/path/to/input/file")
+
+val counts = text
+  .flatMap { _.toLowerCase.split("\\W+") filter { _.nonEmpty } }
+  .map { (_, 1) }
+  .groupBy(0)
+  .sum(1)
+
+counts.writeAsCsv(outputPath, "\n", " ")
+</pre>
+
+</div>
+
+
+</article>
+
+</slide>
+
+</slide>
+<slide class="backdrop"></slide>
+</slides> 
+<!--[if IE]>
+  <script src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js"></script>
+  <script>CFInstall.check({mode: 'overlay'});</script>
+<![endif]-->
+</body> 
+
+</html>
