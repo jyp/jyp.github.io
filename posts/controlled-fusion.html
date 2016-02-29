@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Gabuzomeu - How to Control Fusion</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Gabuzomeu</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>How to Control Fusion</h1>
+
+            <div class="info">
+    Last updated on February 29, 2016
+    
+        by Jean-Philippe Bernardy
+    
+</div>
+<div class="info">
+    
+        Tags: <a href="../tags/Haskell.html">Haskell</a>
+    
+</div>
+
+<h1 id="explicit-fusion">Explicit Fusion</h1>
+<p>From a sufficiently high-level point of view, the idea behind short-cut fusion is to:</p>
+<ol style="list-style-type: decimal">
+<li>Convert functions on Lists to a representation which does not involve explicit (general) recursion. Let’s call this representation <code>List'</code>.</li>
+<li>Let the inliner simplify expressions. The absence of general recursion means that it can do a good job, only using well-known and reliable means.</li>
+<li>Revert the eventual non-eliminated occurrences of <code>List'</code>.</li>
+</ol>
+<p>The above <em>modus operandi</em> means that the programmer works with a representation of lists which is not that being used by the optimizer. Consequently, it can be hard to predict when fusion occurs in any given program. One way to circumvent this issue is to work directly with a non-recursive representation.</p>
+<h1 id="mu-and-nu-lists">Mu and Nu Lists</h1>
+<p>But which representation should one chose? There are two obvious choices: either the least fixpoint or the greatest fixpoint; called respectively Mu (μ) and Nu (ν).</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Mu</span> f <span class="fu">=</span> <span class="dt">Mu</span> {<span class="ot">fold ::</span> forall x<span class="fu">.</span> (f x <span class="ot">-&gt;</span> x) <span class="ot">-&gt;</span> x}
+
+<span class="kw">data</span> <span class="dt">Nu</span> f <span class="kw">where</span>
+  <span class="dt">Unfold</span><span class="ot"> ::</span> (x <span class="ot">-&gt;</span> f x) <span class="ot">-&gt;</span> x <span class="ot">-&gt;</span> <span class="dt">Nu</span> f</code></pre></div>
+<p>Representation chosen by Gill et al are Mu lists. This choice and yields the shortcut fusion used in GHC, also known as the ‘foldr/build’ rule. Nu lists are used by Svenningsson and yield the ‘destroy/unfoldr’ rule. Both these representations use the same, standard functor for lists:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">F</span> a x <span class="fu">=</span> <span class="dt">Stop</span> <span class="fu">|</span> <span class="dt">More</span> a x</code></pre></div>
+<p>(The ‘stream fusion’ of Coutts et al. use another functor; I’m not going to get into why here.)</p>
+<p>Making the choice between Mu or Nu lists means that certain functions are fused, while some others are not. When the choice is automatic (as in all the user-facing shortcut fusion facilities), the programmer is at the mercy of the choice made by the implementer. On the other hand, if the programmer controls the choice, they can pick the best representation for the job at hand. However, to make a sensible choice one must have a good grasp of which representation is good for what. Let’s try to help by giving an intuitive description of Mu and Nu.</p>
+<p>Least fixpoints (Mu) are <em>computations that can consume the structure, in one go</em>. That is, they want to control when to consume each level of the structure. They are naturally <em>masters</em>. We say that they are <em>negative</em> types.</p>
+<p>Greatest fixpoints (Nu) are <em>computations that can generate the structure, on demand</em>. That is, they want to control when to produce the next level of the structure. They are naturally <em>slaves</em>. We say that they are <em>positive</em> types.</p>
+<h1 id="good-citizens">Good citizens</h1>
+<p>We can now characterize the functions which ‘behave well’ given a selection of polarity for their arguments and results. Intuitively, there must be a master which drives the order the computation, and some slaves which follow that order.</p>
+<p>More precisely, a computation can fuse with its context if and only if the context contains <em>exactly one master</em>. This means that to be fusible, any given function must have at most one one negative argument — and we count results as arguments of the opposite polarity. (This rule is a generalization of the ‘good consumer/good producer’ rules of thumb explained in the GHC manual.)</p>
+<p>Let’s take a look at a few simple examples. First, a map.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">mapMu ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Mu</span> (<span class="dt">F</span> a) <span class="ot">-&gt;</span> <span class="dt">Mu</span> (<span class="dt">F</span> b)</code></pre></div>
+<p>in this case we have one negative argument (master) and one negative result (slave). Thus, we can write a fusible implementation:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">mapMu ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">Mu</span> (<span class="dt">F</span> a) <span class="ot">-&gt;</span> <span class="dt">Mu</span> (<span class="dt">F</span> b)
+mapMu f (<span class="dt">Mu</span> phi0) <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi1 <span class="ot">-&gt;</span> phi0 <span class="fu">$</span> phi1 <span class="fu">.</span> mapF f
+  <span class="kw">where</span>
+    mapF _ <span class="dt">Stop</span> <span class="fu">=</span> <span class="dt">Stop</span>
+    mapF f (<span class="dt">More</span> a x) <span class="fu">=</span> <span class="dt">More</span> (f a) x</code></pre></div>
+<p>(Note the lack of recursion.) Second, let’s consider a zip-like function:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">zipNu ::</span> <span class="dt">Nu</span> (<span class="dt">F</span> a) <span class="ot">-&gt;</span> <span class="dt">Nu</span> (<span class="dt">F</span> b) <span class="ot">-&gt;</span> <span class="dt">Nu</span> (<span class="dt">F</span> (a,b))</code></pre></div>
+<p>We have two positive arguments (slaves) and one positive result (master). We can thus write:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">zipNu (<span class="dt">Unfold</span> psi0 s0) (<span class="dt">Unfold</span> psi1 s1)
+  <span class="fu">=</span> <span class="dt">Unfold</span> psi (s0,s1) <span class="kw">where</span>
+    psi (s,t) <span class="fu">=</span> <span class="kw">case</span> (psi0 s, psi1 t) <span class="kw">of</span>
+      (<span class="dt">More</span> a s', <span class="dt">More</span> b t') <span class="ot">-&gt;</span> <span class="dt">More</span> (a,b) (s',t')
+      _ <span class="ot">-&gt;</span> <span class="dt">Stop</span></code></pre></div>
+<p>(You may want to try your hand at writing other zip-like functions, mixing several Nu’s and Mu’s.)</p>
+<h1 id="not-so-good-citizens">Not so good citizens</h1>
+<p>What happens when there is no master? In this case, we must conjure-up an evaluation order. That is, write a loop. The only way to do this in Haskell is to use recursion:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">loop ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Nu</span> f <span class="ot">-&gt;</span> <span class="dt">Mu</span> f
+loop (<span class="dt">Unfold</span> psi s0) <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi <span class="ot">-&gt;</span> <span class="kw">let</span> go <span class="fu">=</span> phi <span class="fu">.</span> fmap go <span class="fu">.</span> psi
+                                    <span class="kw">in</span> go s0</code></pre></div>
+<p>When <code>loop</code> is composed with a fusible function <code>f</code>, the transformations performed by <code>f</code> will be executed one bit at a time, as the lists are being consumed or produced by the <code>loop</code>.</p>
+<p>What happens when there are two masters? Is such a function impossible to write? No! It just means that we can’t perform fusion. We have to allocate an intermediate data structure.</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">alloc ::</span> <span class="dt">Mu</span> f <span class="ot">-&gt;</span> <span class="dt">Nu</span> f</code></pre></div>
+<p>The only way to do this in Haskell is also to use recursion; this time in the definition of a data type:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">newtype</span> <span class="dt">Fix</span> f <span class="fu">=</span> <span class="dt">In</span> {<span class="ot">out ::</span> f (<span class="dt">Fix</span> f)}</code></pre></div>
+<p>Allocating a structure of type <code>Fix f</code> from a <code>Mu f</code> is immediate:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">muAlloc ::</span> <span class="dt">Mu</span> f <span class="ot">-&gt;</span> <span class="dt">Fix</span> f
+muAlloc m <span class="fu">=</span> fold m <span class="dt">In</span></code></pre></div>
+<p>traversing the structure to get a Nu type is not harder:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">nuWalk ::</span> <span class="dt">Fix</span> f <span class="ot">-&gt;</span> <span class="dt">Nu</span> f
+nuWalk <span class="fu">=</span> <span class="dt">Unfold</span> out</code></pre></div>
+<p>and we thus have:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">alloc <span class="fu">=</span> nuWalk <span class="fu">.</span> muAlloc</code></pre></div>
+<p>For completeness, let’s write the two missing conversions between Fix and Mu/Nu. They correspond to folding and unfolding the Fix structure. Those are standard generic programming functions that have the following implementations:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">fixFold ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> (f a <span class="ot">-&gt;</span> a) <span class="ot">-&gt;</span> <span class="dt">Fix</span> f <span class="ot">-&gt;</span> a
+fixFold f <span class="fu">=</span> f <span class="fu">.</span> fmap (fixFold f) <span class="fu">.</span> out
+
+<span class="ot">fixUnfold ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> (a <span class="ot">-&gt;</span> f a) <span class="ot">-&gt;</span> a <span class="ot">-&gt;</span> <span class="dt">Fix</span> f
+fixUnfold f <span class="fu">=</span> <span class="dt">In</span> <span class="fu">.</span> fmap (fixUnfold f) <span class="fu">.</span> f</code></pre></div>
+<p>And the conversions simply wrap those:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="ot">nuAlloc ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Nu</span> f <span class="ot">-&gt;</span> <span class="dt">Fix</span> f
+nuAlloc (<span class="dt">Unfold</span> psi s0) <span class="fu">=</span> fixUnfold psi s0
+
+<span class="ot">muWalk ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Fix</span> f <span class="ot">-&gt;</span> <span class="dt">Mu</span> f
+muWalk s <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi <span class="ot">-&gt;</span> fixFold phi s</code></pre></div>
+<p>Because no Haskell blog post is complete without a little proof, we can finish by showing that <code>loop = muWalk . nuAlloc</code>. We start by unfolding this equality:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">loop (<span class="dt">Unfold</span> psi s0) <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi <span class="ot">-&gt;</span> (fixFold phi <span class="fu">.</span> fixUnfold psi) s0</code></pre></div>
+<p>Let’s give a name to <code>fixFold phi . fixUnfold psi</code> and calculate:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">go <span class="fu">=</span> fixFold phi <span class="fu">.</span> fixUnfold psi
+   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi) <span class="fu">.</span> out <span class="fu">.</span> <span class="dt">In</span> <span class="fu">.</span> fmap (fixUnfold psi) <span class="fu">.</span> psi
+   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi) <span class="fu">.</span> fmap (fixUnfold psi) <span class="fu">.</span> psi
+   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi <span class="fu">.</span> fixUnfold psi) <span class="fu">.</span> psi
+   <span class="fu">=</span> phi <span class="fu">.</span> fmap go <span class="fu">.</span> psi</code></pre></div>
+<h1 id="further-reading">Further Reading</h1>
+<p>If you’re interested in digging into the concepts of polarity and fusion, I’ve developed them in two papers:</p>
+<ol style="list-style-type: decimal">
+<li>In <a href="https://gist.github.com/jyp/fadd6e8a2a0aa98ae94d">On the Duality of Streams</a>, we investigate the role of polarity in defining effectful streams (pipes or conduits-like).</li>
+<li>In <a href="http://lopezjuan.com/limestone/vectorcomp.pdf">Composable Efficient Array Computations Using Linear Types</a>, we see how we can take short-cut fusion to its limits, using linear types. In particular, we investigate a self-dual kind of list, which sits between Mu and Nu lists.</li>
+</ol>
+<!--
+LocalWords:  inliner modus operandi newtype forall et al foldr unfoldr mapF
+LocalWords:  Coutts fixpoints mapMu zipNu fmap alloc muAlloc nuWalk nuAlloc
+LocalWords:  fixUnfold fixFold muWalk
+-->
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
