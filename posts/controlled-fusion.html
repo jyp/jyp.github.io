@@ -53,7 +53,8 @@
 <span class="kw">data</span> <span class="dt">Nu</span> f <span class="kw">where</span>
   <span class="dt">Unfold</span><span class="ot"> ::</span> (x <span class="ot">-&gt;</span> f x) <span class="ot">-&gt;</span> x <span class="ot">-&gt;</span> <span class="dt">Nu</span> f</code></pre></div>
 <p>The representation chosen by Gill et al are Mu lists. This choice and yields the shortcut fusion system used in GHC, also known as the ‘foldr/build’ rule. Nu lists are used by Svenningsson and yield the ‘destroy/unfoldr’ rule. Both these representations use the same, standard functor for lists:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">F</span> a x <span class="fu">=</span> <span class="dt">Stop</span> <span class="fu">|</span> <span class="dt">More</span> a x</code></pre></div>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">data</span> <span class="dt">F</span> a x <span class="fu">=</span> <span class="dt">Stop</span> <span class="fu">|</span> <span class="dt">More</span> a x
+  <span class="kw">deriving</span> <span class="dt">Functor</span></code></pre></div>
 <p>(The ‘stream fusion’ of Coutts et al. use another functor; I’m not going to get into why here.)</p>
 <p>The choice of either Mu or Nu lists influences the set of functions which can be fused. When the choice is automatic (as in all the user-facing shortcut fusion facilities), the programmer is at the mercy of the choice made by the implementer. On the other hand, if the programmer controls the choice, they can pick the best representation for the job at hand. However, to make a sensible choice one must have a good grasp of which representation is good for what. Let me try to help by giving an intuitive description of Mu and Nu types.</p>
 <p>Least fixpoints (Mu) are <em>computations that can consume the structure, in one go</em>. That is, they want to control when to consume each level of the structure. They are naturally <em>masters</em>. We say that they are <em>negative</em> types.</p>
@@ -112,14 +113,21 @@ nuAlloc (<span class="dt">Unfold</span> psi s0) <span class="fu">=</span> fixUnf
 
 <span class="ot">muWalk ::</span> <span class="dt">Functor</span> f <span class="ot">=&gt;</span> <span class="dt">Fix</span> f <span class="ot">-&gt;</span> <span class="dt">Mu</span> f
 muWalk s <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi <span class="ot">-&gt;</span> fixFold phi s</code></pre></div>
-<p>Because no Haskell blog post is complete without a little proof, we can finish by showing that <code>loop = muWalk . nuAlloc</code>. We start by unfolding this equality:</p>
+<p>Because no Haskell blog post is complete without a little proof, we can finish by showing that <code>loop = muWalk . nuAlloc</code> (but fused). We start by unfolding the equality:</p>
 <div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">loop (<span class="dt">Unfold</span> psi s0) <span class="fu">=</span> <span class="dt">Mu</span> <span class="fu">$</span> \phi <span class="ot">-&gt;</span> (fixFold phi <span class="fu">.</span> fixUnfold psi) s0</code></pre></div>
-<p>Let’s give a name to <code>fixFold phi . fixUnfold psi</code> and calculate:</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">go <span class="fu">=</span> fixFold phi <span class="fu">.</span> fixUnfold psi
-   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi) <span class="fu">.</span> out <span class="fu">.</span> <span class="dt">In</span> <span class="fu">.</span> fmap (fixUnfold psi) <span class="fu">.</span> psi
-   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi) <span class="fu">.</span> fmap (fixUnfold psi) <span class="fu">.</span> psi
-   <span class="fu">=</span> phi <span class="fu">.</span> fmap (fixFold phi <span class="fu">.</span> fixUnfold psi) <span class="fu">.</span> psi
-   <span class="fu">=</span> phi <span class="fu">.</span> fmap go <span class="fu">.</span> psi</code></pre></div>
+<p>Then we give a name to <code>fixFold phi . fixUnfold psi</code> and calculate:</p>
+<pre class="haskella"><code>go = fixFold phi . fixUnfold psi
+   = phi . fmap (fixFold phi) . out . In . fmap (fixUnfold psi) . psi
+   = phi . fmap (fixFold phi) . fmap (fixUnfold psi) . psi
+   = phi . fmap (fixFold phi . fixUnfold psi) . psi
+   = phi . fmap go . psi</code></pre>
+<h1 id="conclusion">Conclusion</h1>
+<p>In summary, my recommendations for writing code where fusion happens reliably are to:</p>
+<ol style="list-style-type: decimal">
+<li><p>Roll out you own non-recursive types, or use a library which internally use non-recursive types;</p></li>
+<li><p>Select representations accordingly to the the behaviour that they should have (master/slave). Library writer should expose both versions, for the user to select.</p></li>
+<li><p>Add non-fusible conversion functions at the appropriate places. Library writer should provide such conversion functions.</p></li>
+</ol>
 <h1 id="further-reading">Further Reading</h1>
 <p>If you’re interested in digging into the concepts of polarity and fusion, I’ve developed them in two papers:</p>
 <ol style="list-style-type: decimal">
