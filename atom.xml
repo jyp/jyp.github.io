@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>JP's blog latest posts</title>
+    <link href="http://jyp.github.io/atom.xml" rel="self" />
+    <link href="http://jyp.github.io" />
+    <id>http://jyp.github.io/atom.xml</id>
+    <author>
+        <name>Jean-Philippe Bernardy</name>
+        <email>jeanphilippe.bernardy@gmail.com</email>
+    </author>
+    <updated>2016-02-29T00:00:00Z</updated>
+    <entry>
+    <title>Controlling Fusion In Haskell</title>
+    <link href="http://jyp.github.io/posts/controlled-fusion.html" />
+    <id>http://jyp.github.io/posts/controlled-fusion.html</id>
+    <published>2016-02-29T00:00:00Z</published>
+    <updated>2016-02-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[How to write Haskell code in a way that lets the programmer control when fusion happens.]]></summary>
+</entry>
+<entry>
+    <title>HOWTO: Nix for Haskell Development</title>
+    <link href="http://jyp.github.io/posts/nix.html" />
+    <id>http://jyp.github.io/posts/nix.html</id>
+    <published>2015-06-15T00:00:00Z</published>
+    <updated>2015-06-15T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A HOWTO on using nix for Haskell development.]]></summary>
+</entry>
+<entry>
+    <title>Towards The Prettiest Printer</title>
+    <link href="http://jyp.github.io/posts/towards-the-prettiest-printer.html" />
+    <id>http://jyp.github.io/posts/towards-the-prettiest-printer.html</id>
+    <published>2015-05-01T00:00:00Z</published>
+    <updated>2015-05-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[On defining an even prettier printer]]></summary>
+</entry>
+
+</feed>
