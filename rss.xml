@@ -7,8 +7,16 @@
         <description><![CDATA[This feed provides JP's latests posts]]></description>
         <atom:link href="http://jyp.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Mon, 29 Feb 2016 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Tue, 01 Nov 2016 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Concurrency in elisp via CPS</title>
+    <link>http://jyp.github.io/posts/elisp-cps.html</link>
+    <description><![CDATA[This is the post description]]></description>
+    <pubDate>Tue, 01 Nov 2016 00:00:00 UT</pubDate>
+    <guid>http://jyp.github.io/posts/elisp-cps.html</guid>
+    <dc:creator>Jean-Philippe Bernardy</dc:creator>
+</item>
+<item>
     <title>Controlling Fusion In Haskell</title>
     <link>http://jyp.github.io/posts/controlled-fusion.html</link>
     <description><![CDATA[How to write Haskell code in a way that lets the programmer control when fusion happens.]]></description>
@@ -17,7 +25,7 @@
     <dc:creator>Jean-Philippe Bernardy</dc:creator>
 </item>
 <item>
-    <title>HOWTO: Nix for Haskell Development</title>
+    <title>HOWTO --- Nix for Haskell Development</title>
     <link>http://jyp.github.io/posts/nix.html</link>
     <description><![CDATA[A HOWTO on using nix for Haskell development.]]></description>
     <pubDate>Mon, 15 Jun 2015 00:00:00 UT</pubDate>

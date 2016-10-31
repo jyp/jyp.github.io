@@ -8,8 +8,16 @@
         <name>Jean-Philippe Bernardy</name>
         <email>jeanphilippe.bernardy@gmail.com</email>
     </author>
-    <updated>2016-02-29T00:00:00Z</updated>
+    <updated>2016-11-01T00:00:00Z</updated>
     <entry>
+    <title>Concurrency in elisp via CPS</title>
+    <link href="http://jyp.github.io/posts/elisp-cps.html" />
+    <id>http://jyp.github.io/posts/elisp-cps.html</id>
+    <published>2016-11-01T00:00:00Z</published>
+    <updated>2016-11-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
     <title>Controlling Fusion In Haskell</title>
     <link href="http://jyp.github.io/posts/controlled-fusion.html" />
     <id>http://jyp.github.io/posts/controlled-fusion.html</id>
@@ -18,7 +26,7 @@
     <summary type="html"><![CDATA[How to write Haskell code in a way that lets the programmer control when fusion happens.]]></summary>
 </entry>
 <entry>
-    <title>HOWTO: Nix for Haskell Development</title>
+    <title>HOWTO --- Nix for Haskell Development</title>
     <link href="http://jyp.github.io/posts/nix.html" />
     <id>http://jyp.github.io/posts/nix.html</id>
     <published>2015-06-15T00:00:00Z</published>
