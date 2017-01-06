@@ -27,7 +27,7 @@
             <h1>A dual view of testing of (polymorphic) programs</h1>
 
             <div class="info">
-    Last updated on January  2, 2017
+    Last updated on January  3, 2017
     
 </div>
 <div class="info">
@@ -50,18 +50,22 @@
 <td><span class="math inline">=<em>A</em> × ∼<em>B</em></span></td>
 </tr>
 <tr class="even">
-<td><span class="math inline">∼(<em>A</em> → <em>B</em>)</span></td>
-<td><span class="math inline">=<em>A</em> × ∼<em>B</em></span></td>
-</tr>
-<tr class="odd">
 <td><span class="math inline">∼(<em>A</em> × <em>B</em>)</span></td>
 <td><span class="math inline">=<em>A</em> → ∼<em>B</em></span></td>
 </tr>
+<tr class="odd">
+<td><span class="math inline">∼(∀<em>α</em>.<em>A</em>)</span></td>
+<td><span class="math inline">=∃<em>α</em>.∼<em>A</em></span></td>
+</tr>
 <tr class="even">
+<td><span class="math inline">∼(∃<em>α</em>.<em>A</em>)</span></td>
+<td><span class="math inline">=∀<em>α</em>.∼<em>A</em></span></td>
+</tr>
+<tr class="odd">
 <td><span class="math inline">∼(⊥)</span></td>
 <td><span class="math inline">=1</span></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><span class="math inline">∼(1)</span></td>
 <td><span class="math inline">=⊥</span></td>
 </tr>
@@ -90,7 +94,7 @@
 </tr>
 <tr class="even">
 <td><span class="math inline">⟦<em>A</em> → <em>B</em>⟧<sub><em>Γ</em></sub></span></td>
-<td><span class="math inline">=⟦∼<em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧(<em>x</em> : <em>A</em>, <em>Γ</em>)</span></td>
+<td><span class="math inline">=⟦∼<em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧<sub>(<em>Γ</em>, <em>x</em> : <em>A</em>)</sub></span></td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">⟦<em>α</em>⟧<sub><em>Γ</em></sub></span></td>
@@ -125,11 +129,11 @@
 </tr>
 <tr class="odd">
 <td></td>
-<td><span class="math inline">=⟦∼<em>α</em>⟧∪⟦<em>α</em>⟧[<em>x</em> : <em>α</em>]∪{<em>κ</em>₂:<em>α</em>}</span></td>
+<td><span class="math inline">=⟦∼<em>α</em>⟧∪⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂:<em>α</em>}</span></td>
 </tr>
 <tr class="even">
 <td></td>
-<td><span class="math inline">={} ∪ ⟦<em>α</em>⟧[<em>x</em> : <em>α</em>]∪{<em>κ</em>₂:<em>α</em>}</span></td>
+<td><span class="math inline">={} ∪ ⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂:<em>α</em>}</span></td>
 </tr>
 <tr class="odd">
 <td></td>
