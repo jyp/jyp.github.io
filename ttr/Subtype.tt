@@ -1,0 +1,19 @@
+module
+
+Convertible : (A : Type) -> (x y : A) -> Type
+Convertible A x y = (P : (z :+ A) -> Type) -> P x -> P y
+
+Subtype : (A B : Type) -> Type
+Subtype A B = Convertible Type A B
+
+convert : (A B : Type) -> Subtype A B -> A -> B
+convert _ _ p a = p (\r -> r)
+
+refl : (A : Type) -> (x : A) -> Convertible A x x
+refl A x P p = p
+
+Subtype'  : (A B : Type) -> Type
+Subtype' = [f : A -> B; idF : Eq' ]
+
+
+

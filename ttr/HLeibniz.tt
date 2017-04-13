@@ -1,0 +1,10 @@
+module
+
+
+Eq : (A B : Type) -> (x : A) (y : B) -> Type
+Eq A x y = (P : A \/ B -> Type) -> P x -> P y
+
+refl : (A : Type) -> (x : A) -> Eq A A x x
+refl A x P p = p
+
+

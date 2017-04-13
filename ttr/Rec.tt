@@ -1,0 +1,104 @@
+\(params :
+           [Ind    : Type;
+            -- nextInd : Ind -> Ind; -- dangerous
+            Animal : Ind -> Type;
+            Human  : Ind -> Type;
+            Dog    : Ind -> Type;
+            Donkey : Ind -> Type;
+            Hug    : Ind -> Ind -> Type;
+            Own    : Ind -> Ind -> Type;
+            a0     : Ind;
+            a100   : Ind;
+            aH     : Human a0;
+            aA     : Animal a0;
+            believe : Type -> Ind -> Type;
+            a0BelieveA0Dog : believe (Dog a0) a0
+            -- bad :  believe (Dog a0) a0 -> believe (Dog a0 \/ Dog (nextInd a0) ) a0 ;
+            -- bad' : believe p x -> p
+            ]) -> module
+
+Sigma : (A : Type) -> (B : A -> Type) -> Type
+Sigma A B = [fst : A ;
+             snd : B fst]
+
+first : (A : Type) -> (B : A -> Type) -> Sigma A B -> A
+first A B r = r.fst
+
+second : (A : Type) -> (B : A -> Type) -> (r : Sigma A B) -> B (r.fst)
+second A B r = r.snd
+
+second' : (A : Type) -> (B : A -> Type) -> (r : Sigma A B) -> B (first A B r)
+second' A B r = r.snd
+
+
+open params
+
+-- exampleNestedRecord : Type
+-- exampleNestedRecord =
+--   [x : Ind;
+--    r : let y : Ind
+--            y = x
+--        in [x : Ind;
+--            p : Hug x y]]
+
+-- exampleNestedRecord : Type
+-- exampleNestedRecord =
+--   [x : Ind;
+--    r : (\(y:Int) -> [x : Ind;
+--                      p : Hug x y]) x]
+
+PN : Type
+PN = [x : Ind;
+      cn : Ind -> Type;
+      isCn : cn x]
+
+
+Anim : Type
+Anim = [x : Ind; isAnimal : Animal x]
+
+Huma : Type
+Huma = Anim /\ [x : Ind; isHuman : Human x]
+
+a : Huma
+a = (x = a0, isHuman = aH, isAnimal = aA)
+
+b : Anim
+b = a
+
+ManOwnADonkey : Type
+ManOwnADonkey = [x : Ind;
+                 y : Ind;
+                 q : Animal x;
+                 p : Human x;
+                 q : Donkey y;
+                 o : Own x y]
+
+f : ManOwnADonkey -> Huma
+f r = (x = r.x, isHuman = r.p, isAnimal = _)
+  where open r
+
+ManOwnADonkey2 : Type
+ManOwnADonkey2 = [x : Huma;
+                  y : Ind;
+                  q : Donkey y;
+                  o : Own x.x y]
+
+f : ManOwnADonkey2 -> Huma
+f r = r.x
+
+VP : Type
+VP = Ind -> Type
+
+NP' : Type
+NP' = (verb : VP) -> [subject : Ind; holds : verb subject]
+
+S : Type
+S = [subject : Ind;
+     verb : Ind -> Type;
+     holds : verb subject]
+
+
+appVP' : VP -> NP' -> S
+appVP' vp np = (verb = vp, subject = s0.subject, holds = s0.holds)
+  where s0 : [subject : Ind; holds : vp subject]
+        s0 = np vp
