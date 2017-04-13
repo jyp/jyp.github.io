@@ -1,6 +1,6 @@
 code size summary per package:
 
-base:                    765340
+base:                    765851
 containers-0.5.7.1-9AY76Rzb1QLJmP8p4wSZRz:532734
 deepseq-1.4.2.0-47yvsc92PQF1rYmebWoAXZ:884
 gasp-1.0.1.0-KZouOChx1Uv2lsOQnA4tLw:15131
@@ -9,7 +9,7 @@ ghcjs-base-0.2.0.0-JwrMkgsW2c39o6FcMFpu8A:40389
 ghcjs-dom-jsffi-0.7.0.4-JACZ0Kmvr7Q3vQG4OT5FCl:61232
 ghcjs-prim-0.1.0.0-IFhsWclGfLr1HfhUvIVylA:11448
 integer-gmp:             80163
-main:                    1334606
+main:                    1337573
 mtl-2.2.1-JWmkRmuDwS4ARUue7XBzoF:37373
 pretty-compact-2.0-HeT7JL8qRexlZiFIflvFJ:58264
 transformers-0.5.2.0-Lvs3wlJMkpyLRFNHJ8pmeB:95348
@@ -30,7 +30,7 @@ base
     Data.Functor.Identity:              1266
     Data.Maybe:                         1058
     Data.Monoid:                        89
-    Data.OldList:                       14707
+    Data.OldList:                       15218
     Data.Proxy:                         66
     Data.Traversable:                   5887
     Data.Tuple:                         829
@@ -143,7 +143,7 @@ main
     Exp.Par:                            230123
     Exp.Print:                          83167
     Loader:                             11996
-    Main:                               16622
+    Main:                               19589
     Pretty:                             15799
     TT:                                 70121
     TypeChecker:                        125571
@@ -168,5 +168,5 @@ transformers-0.5.2.0-Lvs3wlJMkpyLRFNHJ8pmeB
 
 
 
-packed metadata: 672387
+packed metadata: 673616
 
