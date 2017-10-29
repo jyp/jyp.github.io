@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Not JP's Blog - Donkey sentences and linear logic</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Donkey sentences and linear logic</h1>
+
+            <div class="info">
+    Last updated on October 29, 2017
+    
+</div>
+<div class="info">
+    
+        Tags: 
+    
+</div>
+
+<h2 id="the-issue">The issue</h2>
+<p>Consider the sentence “every man who owns a donkey beat it”.</p>
+<p>Quoting wikipedia:</p>
+<p>Donkey sentences present the following problem, when represented in first-order logic: The systematic translation of every existential expression in the sentence into existential quantifiers produces an incorrect representation of the sentence, since it leaves a free occurrence of the variable y in beat(x,y):</p>
+<p>(1) ∀x:Man. (∃y:Donkey. own(x,y)) → beat(x,y)</p>
+<p>On the face of it, one must extend the scope of y so that y is accesible in beat(x,y). Unfortunately, simply moving the quantifier out (and changing the polarity as expected) does not yield the preferred reading:</p>
+<p>(2) ∀x:Man. ∀y:Donkey. (own(x,y) → beat(x,y))</p>
+<p>Which is equivalent to stating: “every man beats every donkey that he owns”. But that is not the preferred reading of the sentence! Indeed, we meant to say that, given any x:Man, we could find <em>one</em> owned donkey being beaten. Not every one of them.</p>
+<h2 id="a-false-lead">A false lead</h2>
+<p>In the form of dependently-typed theory, constructive logic offers a way to apparently solve the problem. Indeed, existentials are given a <em>constructive</em> interpretation; that is, given one proof z of (∃y. own(x,y)), the first projection of z (written π1 z) yields the witness that was used to construct the proof. So we can repair the scoping issue of (1) thus:</p>
+<p>(3) ∀x:Man. ∀(z:(∃y:Donkey. own(x,y))) → beat(x,π1 z)</p>
+<p>Or, using the syntax of sum and product types:</p>
+<p>(4) Π(x:Man). Π(z:Σ(x:Donkey). own(x,y)). beat(x,π1 z)</p>
+<p>Which, by currification, is in turn isomorphic to</p>
+<p>(5) Π(x:Man). Π(y:Donkey). own(x,y) → beat(x,y)</p>
+<p>And, we’re back to (2). So in fact, the scoping issue is a red-herring. Even when we fix it, using a constructive interpretations, we have not solved the original issue.</p>
+<h2 id="alternate-forall.">Alternate forall.</h2>
+<p>∀₁(x:A)(B[x])</p>
+<p>∃(x:A)(B[x]) + (¬A)</p>
+<h2 id="beating-in-moderation">Beating in moderation</h2>
+<p>Let us spell out the constructive meaning of (5). Any proof of (5) is a device that turns</p>
+<ul>
+<li>any x:Man and</li>
+<li>any pair of y:Donkey and a proof of <code>own(x,y)</code></li>
+</ul>
+<p>into a proof of <code>beat(x,y)</code></p>
+<p>In particular for any given x:Man, I can use the device as many times as I want, and thereby turn all the owned donkeys into beaten pulps. That’s not very nice.</p>
+<p>We can now see the issue: for any given man, we should be granted to use the device a single time, so that a single donkey can be beaten:</p>
+<p>(5) Π(x:Man). Π(y:Donkey). own(x,y) → beat(x,y) <strong>_______________________________</strong></p>
+<p>[The underlined statement should be usable just once — per x]</p>
+<p>How can we express this formally? Girard offers the appropriate language: his linear logic. Unfortunately, the linear logic box comes only with the dual tool, linear implication (⊸), which asserts that the <em>antecedent</em> is to be used exactly once:</p>
+<p>(6) A ⊸ B</p>
+<p>[A can be used only once in B]</p>
+<p>If we had exactly one man a, we could provide a single:</p>
+<p>Π(y:Donkey). own(a,y) → beat(b,y)</p>
+<p>If we had two we could provide (a single)</p>
+<p>Π(y:Donkey). own(a,y) → beat(a,y) ⊗ Π(y:Donkey). own(b,y) → beat(b,y)</p>
+<p>etc. So what we want is a dependent generalisation of the tensor product (⊗):</p>
+<p>⨂(x:Man). Π(y:Donkey). own(x,y) → beat(x,y)</p>
+<p>If we had exactly one man a, we could provide a single:</p>
+<p>Π(y:Donkey). own(a,y) → beat(b,y)</p>
+<p>If we had two we could provide</p>
+<p>Π(y:Donkey). own(a,y) → beat(a,y) ⊗ Π(y:Donkey). own(b,y) → beat(b,y)</p>
+<p>What we want is a dependent generalisation of the tensor product ⊗:</p>
+<p>⨂(x:Man). Π(y:Donkey). own(a,y) → beat(b,y)</p>
+<p>rules:</p>
+<p>contexts extended with: [x:A], Γ ⊢</p>
+<p>with the meaning that Γ occurs once for every inhabitant of A</p>
+<p>rules:</p>
+<p>Γ, [x:A], B ⊢ x:₀ A, B, Δ ⊢ ——————————- —————————- Γ, ⨂(x:A). B ⊢ ⅋(x:A). B, [x:A], Δ ⊢ ———————————————————————– cut Γ,[x:A], Δ ⊢</p>
+<p>Γ, [x:A], B(x), Δ ⊢ Γ, [x:A], C(x), Δ ⊢ x:₀ A, ~B(x), Δ ⊢ ————————————————– ————————————– Γ, [x:A], B(x) ⊕ C(x), Δ ⊢ x:₀ A, ~B(x) &amp; ~C(x), Δ ⊢</p>
+<hr />
+<p>Γ,[x:A], Δ ⊢</p>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>Not JP's Blog - The duality of memory and control structures</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>The duality of memory and control structures</h1>
+
+            <div class="info">
+    Last updated on April 16, 2017
+    
+        by Jean-Philippe Bernardy
+    
+</div>
+<div class="info">
+    
+        Tags: <a href="../tags/Haskell.html">Haskell</a>
+    
+</div>
+
+<p>I’ve made this point before several times, but people let me know that I should make it stand on its own, so here we go:</p>
+<h1 id="abstract">Abstract</h1>
+<p>Memory arises in the conversion from a negative to positive type. Control structures arise in the conversion from positive to negative types.</p>
+<h1 id="dual-types">Dual types</h1>
+<p>To be able to make the above point, I need two dual types. The simple example I know is that of arrays. So let us conjure a positive, immanent array type:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">PlusArray</span> a <span class="fu">=</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> a</code></pre></div>
+<p>The positivity comes from fact that having such an array, one can access all its elements in any order one wishes. I say that it is immanent because contrary to the traditional notion of array, it lacks any material existence in the form of memory.</p>
+<p>The dual of a type constructor is given by the formula:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Dualize</span> <span class="dt">T</span> a <span class="fu">=</span> <span class="dt">Not</span> (<span class="dt">T</span> (<span class="dt">Not</span> a))</code></pre></div>
+<p>and so:</p>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">NegArray</span> a <span class="fu">=</span> <span class="dt">Not</span> (<span class="dt">T</span> (<span class="dt">Not</span> a))</code></pre></div>
+<h1 id="negation">Negation</h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span class="kw">type</span> <span class="dt">Not</span> a <span class="fu">=</span> a <span class="ot">-&gt;</span> <span class="dt">IO</span> ()</code></pre></div>
+<h1 id="section"></h1>
+<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">
+<span class="ot">{-# LANGUAGE RankNTypes, ScopedTypeVariables #-}</span>
+<span class="kw">import </span><span class="dt">Data.Array.IO</span>
+<span class="kw">import </span><span class="dt">Data.Traversable</span>
+
+<span class="co">-- I've made this point before several times, but people let me know that</span>
+<span class="co">-- I should make it stand on its own, so here we go:</span>
+
+<span class="co">-- Memory arises in the conversion from a negative to positive</span>
+<span class="co">-- type. Control structures arise in the conversion from positive to</span>
+<span class="co">-- negative types.</span>
+<span class="co">-- I will show how this pans out for arrays.</span>
+
+<span class="co">-- * Polarity of types</span>
+
+<span class="co">-- By convention we say that a positive type is a type which lets its</span>
+<span class="co">-- consumer access its components in any order they wish.  Conversely,</span>
+<span class="co">-- we say that a negative type controls the order that a consumer</span>
+<span class="co">-- has to use to access the data that it represents.</span>
+
+<span class="co">-- Thus one can change the polarity of a type by inverting its</span>
+<span class="co">-- producer/consumer role.</span>
+<span class="kw">type</span> <span class="dt">Not</span> a <span class="fu">=</span> a <span class="ot">-&gt;</span> <span class="dt">Eff</span>
+
+
+<span class="co">-- We can chose Eff to be about anything, dependening on the</span>
+<span class="co">-- application.  Here we will access memory and log messages, for</span>
+<span class="co">-- simplicity we will allow arbitrary effects:</span>
+<span class="kw">type</span> <span class="dt">Eff</span> <span class="fu">=</span> <span class="dt">IO</span> ()
+
+
+<span class="co">-- Double inversion (aka. shift) allows to attach effects</span>
+<span class="co">-- (both on the consumer and producer sides):</span>
+<span class="kw">type</span> <span class="dt">NotNot</span> a <span class="fu">=</span> <span class="dt">Not</span> (<span class="dt">Not</span> a)
+
+<span class="co">-- Thus any value can be doubly-negated:</span>
+<span class="ot">shift ::</span> x <span class="ot">-&gt;</span> <span class="dt">NotNot</span> x
+shift x k <span class="fu">=</span> k x
+
+<span class="co">-- Type constructors can be dualised by sandwidching them in</span>
+<span class="co">-- negations.  Doing so has the effect of negating the role of the</span>
+<span class="co">-- constructor itself while leaving the polarity of payload intact.</span>
+<span class="kw">type</span> <span class="dt">Dualize</span> t a <span class="fu">=</span> <span class="dt">Not</span> (t (<span class="dt">Not</span> a))
+
+<span class="co">-- * Dual array types</span>
+
+<span class="co">-- We are ready to define our array types, starting with the negative one.</span>
+<span class="co">-- What we define is the type of control structures iterating over the array.</span>
+<span class="co">-- Such constrol structures are parameterized over three components:</span>
+<span class="co">-- 1. a loop initializer</span>
+<span class="co">-- 2. an iteration step</span>
+<span class="co">-- 3. a loop finializer</span>
+
+<span class="co">-- Furthermore, the initializer produces an environment, which is</span>
+<span class="co">-- available for the other components.</span>
+
+<span class="kw">newtype</span> <span class="dt">NegArray</span> a
+  <span class="fu">=</span> <span class="dt">N</span> {<span class="ot">fromN ::</span> forall b<span class="fu">.</span> ((b <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Not</span> a) <span class="ot">-&gt;</span> <span class="co">-- an iteration: given an env (b), consume a value (Not a) for each index.</span>
+                          <span class="dt">NotNot</span> b <span class="ot">-&gt;</span> <span class="co">-- initialise the environment</span>
+                          <span class="dt">Not</span> b <span class="ot">-&gt;</span> <span class="co">-- finalise the environment</span>
+                          <span class="dt">Eff</span>)}
+
+<span class="co">-- Positive arrays are obtained by dualization:</span>
+
+<span class="kw">type</span> <span class="dt">PosArray</span> a <span class="fu">=</span> <span class="dt">Dualize</span> <span class="dt">NegArray</span> a
+
+
+<span class="co">-- So far, the structures are completely abstract: we have not</span>
+<span class="co">-- committed to any particular array implementation or any specific</span>
+<span class="co">-- loop structure.</span>
+
+<span class="co">-- Consequently, there is no way, by simply composing values of the</span>
+<span class="co">-- above type, to allocate memory or to create control structures.</span>
+<span class="co">-- (The only way to do so is to make specific use of the type of</span>
+<span class="co">-- effects.)</span>
+
+<span class="co">-- Thus, the code produced would be guaranteed to be fused. In fact,</span>
+<span class="co">-- it would be guaranteed not to be exist at all -- to have any effect</span>
+<span class="co">-- whatsoever it needs to be combined with some effectful primitives.</span>
+
+<span class="co">-- Such abstract structures support rich APIs nonetheless. Let us show</span>
+<span class="co">-- mapping functions and leave the rest as an exercise to the reader.</span>
+
+<span class="ot">mapA ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">PosArray</span> a <span class="ot">-&gt;</span> <span class="dt">PosArray</span> b
+mapA f a (<span class="dt">N</span> b') <span class="fu">=</span> a <span class="fu">$</span> <span class="dt">N</span> <span class="fu">$</span> \y <span class="ot">-&gt;</span> b' (\m i x <span class="ot">-&gt;</span> y m i (x <span class="fu">.</span> f))
+
+<span class="ot">mapA' ::</span> (a <span class="ot">-&gt;</span> b) <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a <span class="ot">-&gt;</span> <span class="dt">NegArray</span> b
+mapA' f (<span class="dt">N</span> k) <span class="fu">=</span> <span class="dt">N</span> <span class="fu">$</span> \y <span class="ot">-&gt;</span> k <span class="fu">$</span> \m i x <span class="ot">-&gt;</span> y m i (f x)
+
+
+<span class="co">-- * Control structure</span>
+
+<span class="co">-- Conversion from Pos to Neg array can be done only with an actual</span>
+<span class="co">-- loop.  Note: we have in fact two concrete loop descriptions</span>
+<span class="co">-- (PosArrays) that we have to run in lockstep in a single loop</span>
+<span class="co">-- structure.</span>
+
+<span class="ot">loop ::</span> <span class="dt">PosArray</span> a <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a
+loop a <span class="fu">=</span>
+  <span class="co">-- We can start the function in a purely type-directed way:</span>
+  <span class="dt">N</span> <span class="fu">$</span> \x xinit xfini <span class="ot">-&gt;</span> a <span class="fu">$</span> <span class="dt">N</span> <span class="fu">$</span> \y yinit yfini <span class="ot">-&gt;</span>
+   <span class="co">-- at this point, the critical inputs that we have to make use of are x and y.</span>
+   <span class="co">-- their types are:</span>
+   <span class="co">-- x :: xEnv -&gt; Int -&gt; (Not a)</span>
+   <span class="co">-- y :: yEnv -&gt; Int -&gt; Not (Not a)</span>
+
+   <span class="co">-- Thus, somehow, we have to:</span>
+   <span class="co">-- 1. make sure that we create the appropriate environments xEnv and yEnv:</span>
+  xinit <span class="fu">$</span> \xEnv <span class="ot">-&gt;</span>
+  yinit <span class="fu">$</span> \yEnv <span class="ot">-&gt;</span> <span class="kw">do</span>
+
+  <span class="co">-- 2. call x and y for each element, matching their results.</span>
+  <span class="co">-- We free to chose the order of processing; but we MUST choose.</span>
+  <span class="co">-- Let us go for the simple solution of looping from 0 to the last index.</span>
+
+    forM [<span class="dv">0</span><span class="fu">..</span><span class="dv">8</span>] <span class="fu">$</span> \i <span class="ot">-&gt;</span> <span class="kw">do</span>
+      y yEnv i (x xEnv i)
+
+ <span class="co">-- 3. finalize the environments</span>
+    yfini yEnv
+    xfini xEnv
+
+<span class="co">-- * Memory</span>
+
+
+<span class="co">-- Conversion from Neg to Pos can be done only with memory allocation.</span>
+<span class="co">-- (The string argument is there only for tracing).</span>
+<span class="co">-- Here are the steps:</span>
+<span class="co">-- 1. allocate an array</span>
+<span class="co">-- 2. run the first &quot;input&quot; loop , writing the elements to the array</span>
+<span class="co">-- 3. run the second &quot;output&quot; loop , reading the elements from the array</span>
+<span class="co">-- 4. Free tihe array</span>
+
+<span class="ot">alloc ::</span> forall a<span class="fu">.</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a <span class="ot">-&gt;</span> <span class="dt">PosArray</span> a
+alloc msg a' k <span class="fu">=</span> <span class="kw">do</span>
+  fromN a' (\m i x <span class="ot">-&gt;</span> writeArray m i x) (boop <span class="fu">$</span> <span class="kw">do</span> putStrLn (<span class="st">&quot;Alloc &quot;</span> <span class="fu">++</span> msg); (newArray (<span class="dv">0</span>,<span class="dv">8</span>) <span class="dv">0</span><span class="ot"> ::</span> <span class="dt">IO</span> (<span class="dt">IOArray</span> <span class="dt">Int</span> a))) <span class="fu">$</span> \m <span class="ot">-&gt;</span>
+    fromN k (\_m i k' <span class="ot">-&gt;</span> readArray m i <span class="fu">&gt;&gt;=</span> k') (boop <span class="fu">$</span> return ()) (\_ <span class="ot">-&gt;</span> putStrLn (<span class="st">&quot;Free &quot;</span> <span class="fu">++</span> msg))
+
+<span class="co">-- Helper. TODO (remove)</span>
+<span class="ot">boop ::</span> <span class="dt">IO</span> x <span class="ot">-&gt;</span> <span class="dt">NotNot</span> x
+boop a k <span class="fu">=</span> a <span class="fu">&gt;&gt;=</span> k
+
+<span class="co">-- * Buffers</span>
+
+<span class="co">-- We can introduce explicit buffering in a PosArray pipeline like so:</span>
+<span class="ot">buffer ::</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">PosArray</span> a <span class="ot">-&gt;</span> <span class="dt">PosArray</span> a
+buffer msg <span class="fu">=</span> alloc msg <span class="fu">.</span> loop
+
+<span class="co">-- And dually:</span>
+<span class="ot">buffer' ::</span> <span class="dt">Num</span> a <span class="ot">=&gt;</span> <span class="dt">String</span> <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a
+buffer' msg <span class="fu">=</span> loop <span class="fu">.</span> alloc msg
+
+
+<span class="co">-- * Creating and consuming arrays</span>
+
+<span class="co">-- A positive array which returns always the same thing. No memory needs to be allocated there.</span>
+<span class="ot">constA ::</span> a <span class="ot">-&gt;</span> <span class="dt">PosArray</span> a
+constA x k <span class="fu">=</span> fromN k (\() _i k' <span class="ot">-&gt;</span> k' x) (shift ()) return
+
+<span class="co">-- The dual is a restriction which also performs the loop.</span>
+<span class="ot">constA' ::</span> a <span class="ot">-&gt;</span> <span class="dt">NegArray</span> a
+constA' <span class="fu">=</span> loop <span class="fu">.</span> constA
+
+<span class="co">-- Printing an array:</span>
+<span class="ot">printA' ::</span> <span class="dt">Show</span> a <span class="ot">=&gt;</span> <span class="dt">NegArray</span> a <span class="ot">-&gt;</span> <span class="dt">Eff</span>
+printA' (<span class="dt">N</span> a) <span class="fu">=</span> a (\_m _i <span class="ot">-&gt;</span> print) (shift ()) return
+
+<span class="co">-- And dually</span>
+<span class="ot">printA ::</span> <span class="dt">Show</span> a <span class="ot">=&gt;</span> <span class="dt">PosArray</span> a <span class="ot">-&gt;</span> <span class="dt">Eff</span>
+printA a <span class="fu">=</span> printA' (loop a)
+
+<span class="co">-- * Pipe line example</span>
+
+
+pipeline x f g h <span class="fu">=</span> mapA h <span class="fu">$</span> buffer <span class="st">&quot;gfx&quot;</span> <span class="fu">$</span> mapA g <span class="fu">$</span> buffer <span class="st">&quot;fx&quot;</span> <span class="fu">$</span> mapA f <span class="fu">$</span> buffer <span class="st">&quot;x&quot;</span> <span class="fu">$</span> constA x
+
+pipeline' x f g h <span class="fu">=</span> mapA' h <span class="fu">$</span> buffer' <span class="st">&quot;gfx&quot;</span> <span class="fu">$</span> mapA' g <span class="fu">$</span> buffer' <span class="st">&quot;fx&quot;</span> <span class="fu">$</span> mapA' f <span class="fu">$</span> buffer' <span class="st">&quot;x&quot;</span> <span class="fu">$</span> constA' x
+
+
+<span class="ot">main ::</span> <span class="dt">Eff</span>
+main <span class="fu">=</span> printA (pipeline <span class="dv">123</span> (<span class="fu">+</span><span class="dv">1</span>) (<span class="fu">*</span><span class="dv">2</span>) (<span class="fu">+</span><span class="dv">23</span>))
+
+<span class="ot">main' ::</span> <span class="dt">Eff</span>
+main' <span class="fu">=</span> printA' (pipeline' <span class="dv">123</span> (<span class="fu">+</span><span class="dv">1</span>) (<span class="fu">*</span><span class="dv">2</span>) (<span class="fu">+</span><span class="dv">23</span>))
+
+<span class="co">-- Output.</span>
+
+<span class="co">-- note that buffers are allocated exactly where they should</span>
+
+<span class="co">-- Local Variables:</span>
+<span class="co">-- dante-project-root: &quot;.&quot;</span>
+<span class="co">-- End:</span>
+</code></pre></div>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
