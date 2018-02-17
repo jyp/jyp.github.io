@@ -7,8 +7,16 @@
         <description><![CDATA[This feed provides JP's latests posts]]></description>
         <atom:link href="http://jyp.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sun, 29 Oct 2017 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sat, 17 Feb 2018 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Review of Keyboardio Model 01</title>
+    <link>http://jyp.github.io/posts/Keyboardio.html</link>
+    <description><![CDATA[This is the post description]]></description>
+    <pubDate>Sat, 17 Feb 2018 00:00:00 UT</pubDate>
+    <guid>http://jyp.github.io/posts/Keyboardio.html</guid>
+    <dc:creator>Jean-Philippe Bernardy</dc:creator>
+</item>
+<item>
     <title>Wing Tsun Gothenburg -- programme</title>
     <link>http://jyp.github.io/posts/wt-program.html</link>
     <description><![CDATA[This is the post description]]></description>
