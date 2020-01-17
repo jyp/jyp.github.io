@@ -70,7 +70,7 @@
   (let ((xref (dante--make-xref target &quot;def&quot;)))
     (funcall ret (when xref (list xref)))))
 </code></pre>
-<p>The programmer conceptually binds the result of <code>(blocking-call)</code> to <code>res</code>, that of (dante-async-load-current-buffer nil) to <code>_load-messages</code>, and that of <code>(dante-async-call (concat &quot;:loc-at &quot;
+<p>The programmer conceptually binds the result of <code>(blocking-call)</code> to <code>res</code>, that of (dante-async-load-current-buffer nil) to <code>_load-messages</code>, and that of <code>(dante-async-call (concat ":loc-at "
 symbol))</code> to <code>target</code>. Everything looks (nearly) as tidy as synchronous code, even though we call an asynchronous function at each line.</p>
 <p>The macro facilities of (Emacs) lisp allow to implement <code>cps-let</code> in a handful of lines, as follows (I also support binding several variables at once).</p>
 <pre class="elisp"><code>(defmacro cps-bind (vars expr &amp;rest body)

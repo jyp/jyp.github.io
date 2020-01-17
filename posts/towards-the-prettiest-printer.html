@@ -41,7 +41,7 @@
 <p>Popular Haskell pretty printers have given me less-than-optimal results. This is especially disappointing, as they seem to be the epitome of functional programs, blessed with the correct-by-construction methodology of program development. In this note I review why I find the current solutions sub-optimal, and propose a satisfactory alternative.</p>
 <h1 id="the-state-of-the-art.">The state of the art.</h1>
 <p>Even today, pretty printing in Haskell is mostly backed by two classic libraries, either:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><p>The Hughes-Peyton Jones library. The design is <a href="http://belle.sourceforge.net/doc/hughes95design.pdf">described by Hughes</a> in <em>The Design of a Pretty-printing Library</em>. It has then been adopted (and modified) by Peyton Jones, and was distributed with GHC for a long time, making it the <em>de-facto</em> standard pretty printer. It is now available on Hackage in the <a href="https://hackage.haskell.org/package/pretty">pretty</a> package. I believe that this remains the dominant design, perhaps disputed by…</p></li>
 <li><p>The Wadler-Leijen library. In the penultimate chapter of <em>The Fun of Programming</em>, Wadler re-constructs a pretty printing library from scratch. Keeping true to Hughes in particular and the general functional programming tradition in general, Wadler starts by specifying his library using equational laws, and derives an implementation. Leijen took Wadler’s implementation and modified it to increase its expressivity (but more on that later). The result is available in the eponymous <a href="https://hackage.haskell.org/package/wl-pprint">wl-pprint</a> package.</p></li>
 </ol>
@@ -130,9 +130,9 @@ pretty (Atom x) = text x</code></pre>
           (a b c d))</code></pre>
 <p>At this point, the reader may raise two objections:</p>
 <ul>
-<li>Objection 1: <em>All this fuss for ONE LINE?</em></li>
+<li><p>Objection 1: <em>All this fuss for ONE LINE?</em></p></li>
 <li><p>Reply 1: Every computer-science academic has once in their lifetime been in a killing mood due to a one-line-to-long printout causing a paper to spill over the page limit. So that extra line saved <em>is</em> worth something. Plus, we can construct examples where more space can be saved.</p></li>
-<li>Objection 2: <em>Leijen’s extension of Wadler’s design solves the issue: it provides an <code>align</code> combinator.</em></li>
+<li><p>Objection 2: <em>Leijen’s extension of Wadler’s design solves the issue: it provides an <code>align</code> combinator.</em></p></li>
 <li><p>Reply 2: Yes, but: it exhibits the same symptoms as Hughes’ library.</p>
 <p>Aside: In his paper, Wadler proves that his library produces the shortest output. But, Leijen’s extension breaks this invariant. This makes me suspect that the extension was done on the implementation directly rather than on the design.</p></li>
 </ul>
@@ -219,7 +219,7 @@ render w d = minimumBy (compare `on` height) $ filter (fits w) $ map fst $ eval 
 <li><em>p(t)</em>: the progress inside the document, defined as the number of tokens printed so far. Remember that disjuncted documents must have the same contents, so it is meaningful to compare <em>p(t)</em> and <em>p(u)</em> for every pair of states <em>(t,u)</em>.</li>
 </ul>
 <p>Definition: <em>t</em> dominates <em>u</em> iff. <em>i(t) &lt; i(u)</em> and <em>p(t) &gt;= p(u)</em>.</p>
-<p>Heuristic: If <em>t</em> dominates <em>u</em>, and <em>t</em> is a valid state, then <em>u</em> does not generate the prettiest output. The idea is the following: if <em>u</em> is at a higher indentation level, it has less space to print the rest of the document (remember that indentation is always positive). Therefore, if it is also late in the production of tokens, there is no hope for <em>u</em> to catch up with <em>t</em>. There are some pathological cases where things do not go as I outline above, however they are pretty rare: they never occured in the examples that I’ve tried<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a>.</p>
+<p>Heuristic: If <em>t</em> dominates <em>u</em>, and <em>t</em> is a valid state, then <em>u</em> does not generate the prettiest output. The idea is the following: if <em>u</em> is at a higher indentation level, it has less space to print the rest of the document (remember that indentation is always positive). Therefore, if it is also late in the production of tokens, there is no hope for <em>u</em> to catch up with <em>t</em>. There are some pathological cases where things do not go as I outline above, however they are pretty rare: they never occured in the examples that I’ve tried<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
 <p>Consequently, if there is a finite number <em>l</em> of indentation levels (traditionally <em>l=79</em>), then we have only to consider at worst <em>l</em> solutions after each line break. There is no exponential blow up.</p>
 <p>For completeness, here is the code implementing the above idea.</p>
 <pre class="example"><code>type Docs = [(Int,Doc)]
@@ -267,12 +267,12 @@ renderFast w doc = concat $ reverse $ loop [Process 0 0 [] $ [(0,doc)]]
 <p>Happy pretty printing!</p>
 <!--  LocalWords:  Peyton invariants
  -->
-<div class="footnotes">
+<section class="footnotes" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>I originally thought this heurisitic to be a theorem, as shown in earlier versions of this document.<a href="#fnref1">↩</a></p></li>
+<li id="fn1" role="doc-endnote"><p>I originally thought this heurisitic to be a theorem, as shown in earlier versions of this document.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</div>
+</section>
 
         </div>
         <div id="footer">

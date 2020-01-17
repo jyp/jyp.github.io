@@ -47,7 +47,7 @@
 <p>Following Hughes line of thought, I will argue here that linear types makes the functional programming much more dependable for resource-aware programming. So, what are the glues that FP provide?</p>
 <blockquote>
 <p>The other new kind of glue that functional languages provide enables whole programs to be glued together. Recall that a complete functional program is just a function from its input to its output. If <code>f</code> and <code>g</code> are such programs, then <code>(g . f)</code> is a program which, when applied to its <code>input</code>, computes</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">g (f input)</code></pre></div>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1"></a>g (f input)</span></code></pre></div>
 <p>The program <code>f</code> computes its output which is used as the input to program <code>g</code>. This might be implemented conventionally by storing the output from <code>f</code> in a temporary file. The problem with this is that the temporary file might occupy so much memory that it is impractical to glue the programs together in this way. Functional languages provide a solution to this problem. The two programs <code>f</code> and <code>g</code> are run together in strict synchronisation. <code>F</code> is only started once <code>g</code> tries to read some input, and only runs for long enough to deliver the output <code>g</code> is trying to read. Then <code>f</code> is suspended and <code>g</code> is run until it tries to read another input. As an added bonus, if <code>g</code> terminates without reading all of <code>f</code> ’s output then <code>f</code> is aborted. <code>F</code> can even be a non-terminating program, producing an infinite amount of output, since it will be terminated forcibly as soon as <code>g</code> is finished. This allows termination conditions to be separated from loop bodies – a powerful modularisation.</p>
 <p>Since this method of evaluation runs <code>f</code> as little as possible, it is called “lazy evaluation”. It makes it practical to modularise a program as a generator which constructs a large number of possible answers, and a selector which chooses the appropriate one. While some other systems allow programs to be run together in this manner, only functional languages use lazy evaluation uniformly for every function call, allowing any part of a program to be modularised in this way. Lazy evaluation is perhaps the most powerful tool for modularisation in the functional programmer’s repertoire.</p>
 </blockquote>
@@ -55,25 +55,25 @@
 <h2 id="unpredicatble-memory-behavior">Unpredicatble memory behavior</h2>
 <p>First, it has unpredictable memory behavior. Consider again function composition <code>g . f</code>. One hopes that, at run-time, the intermediate list will only be allocated element-wise, as outlined above. Unfortunately, this desired behavior does not always happen. In fact it can only happen when the production pattern of <code>f</code> matches the consumption pattern of <code>g</code>. Otherwise, buffering occurs. In practice, this means that a seemingly innocuous change in either of the function definitions may drastically change the memory behavior of the composition, without warning.</p>
 <p>Consider the expression <code>sum (enumerate 0 1000000)</code>.</p>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">enumerate i n <span class="fu">|</span> i <span class="fu">&gt;</span> n <span class="fu">=</span> []
-              <span class="fu">|</span> otherwise <span class="fu">=</span> i<span class="fu">:</span>enumerate (i<span class="fu">+</span><span class="dv">1</span>) n</code></pre></div>
-<div class="sourceCode"><pre class="sourceCode haskell"><code class="sourceCode haskell">sum [] <span class="fu">=</span> <span class="dv">0</span>
-sum (x<span class="fu">:</span>xs) <span class="fu">=</span> x <span class="fu">+</span> sum xs</code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1"></a>enumerate i n <span class="op">|</span> i <span class="op">&gt;</span> n <span class="ot">=</span> []</span>
+<span id="cb2-2"><a href="#cb2-2"></a>              <span class="op">|</span> <span class="fu">otherwise</span> <span class="ot">=</span> i<span class="op">:</span>enumerate (i<span class="op">+</span><span class="dv">1</span>) n</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1"></a><span class="fu">sum</span> [] <span class="ot">=</span> <span class="dv">0</span></span>
+<span id="cb3-2"><a href="#cb3-2"></a><span class="fu">sum</span> (x<span class="op">:</span>xs) <span class="ot">=</span> x <span class="op">+</span> <span class="fu">sum</span> xs</span></code></pre></div>
 <p>If one cares about memory behavior, this means that the compositionality principle touted by Hughes breaks down.</p>
 <h2 id="incompatibility-with-effects">Incompatibility with effects</h2>
-<p>Second, lazy evaluation does not extend nicely to effectful processing. That is, if (say) an input list is produced by reading a file lazily, one is exposed to losing referential transparency (as <span class="citation"></span> has shown). For example, one may rightfully expect<a href="#fn1" class="footnoteRef" id="fnref1"><sup>1</sup></a> that both following programs have the same behavior:</p>
+<p>Second, lazy evaluation does not extend nicely to effectful processing. That is, if (say) an input list is produced by reading a file lazily, one is exposed to losing referential transparency (as <span class="citation" data-cites="kiselyov_lazy_2013"></span> has shown). For example, one may rightfully expect<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that both following programs have the same behavior:</p>
 <p>&lt; main = do inFile &lt;- openFile “foo” ReadMode &lt; contents &lt;- hGetContents inFile &lt; putStr contents &lt; hClose inFile &lt; &lt; main = do inFile &lt;- openFile “foo” ReadMode &lt; contents &lt;- hGetContents inFile &lt; hClose inFile &lt; putStr contents</p>
 <p>Indeed, the  and  commands act on unrelated resources, and thus swapping them should have no observable effect. However, while the first program prints the `foo` file, the second one prints nothing. Indeed, because  reads the file lazily, the  operation has the effect to truncate the list. In the first program, printing the contents forces reading the file. One may argue that  should not be called in the first place — but then, closing the handle happens only when the  list can be garbage collected (in full), and relying on garbage collection for cleaning resources is brittle; furthermore this effect compounds badly with the first issue discussed above (unpredictability of buffering). If one wants to use lazy effectful computations, again, the compositionality principle is lost.</p>
 <h2 id="repair-attempts">Repair attempts:</h2>
 <p>Define list.</p>
 <p>data LList a where (:) :: a -o LList a -o LList a [] :: LList a</p>
 <p>an intermediate linear list can <em>always</em> be eliminated. LList a</p>
-<div class="footnotes">
+<section class="footnotes" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1"><p>This expectation is expressed in a Stack Overflow question, accessible at this URL: http://stackoverflow.com/questions/296792/haskell-io-and-closing-files<a href="#fnref1">↩</a></p></li>
+<li id="fn1" role="doc-endnote"><p>This expectation is expressed in a Stack Overflow question, accessible at this URL: http://stackoverflow.com/questions/296792/haskell-io-and-closing-files<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
-</div>
+</section>
 
         </div>
         <div id="footer">

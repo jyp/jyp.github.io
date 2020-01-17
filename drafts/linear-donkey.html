@@ -64,7 +64,7 @@
 <p>into a proof of <code>beat(x,y)</code></p>
 <p>In particular for any given x:Man, I can use the device as many times as I want, and thereby turn all the owned donkeys into beaten pulps. That’s not very nice.</p>
 <p>We can now see the issue: for any given man, we should be granted to use the device a single time, so that a single donkey can be beaten:</p>
-<p>(5) Π(x:Man). Π(y:Donkey). own(x,y) → beat(x,y) <strong>_______________________________</strong></p>
+<p>(5) Π(x:Man). Π(y:Donkey). own(x,y) → beat(x,y) <span class="underline">_______________________________</span></p>
 <p>[The underlined statement should be usable just once — per x]</p>
 <p>How can we express this formally? Girard offers the appropriate language: his linear logic. Unfortunately, the linear logic box comes only with the dual tool, linear implication (⊸), which asserts that the <em>antecedent</em> is to be used exactly once:</p>
 <p>(6) A ⊸ B</p>

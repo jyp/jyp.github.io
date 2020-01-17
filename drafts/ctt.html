@@ -57,7 +57,7 @@ succ n = λα z s. s (n α z s)</code></pre>
 <p>In this note, I will outline a type-theory which supports both aspects.</p>
 <h1 id="back-to-basics">Back To Basics</h1>
 <p>I’ll be assuming the usual common base for type theories, which can be summed as follows:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li>Types are types. I won’t care about universe levels here: the usual story applies.</li>
 <li>You can get stuff out of the context</li>
 <li>There is a decidable relation of conversion between terms, which gives a notion of definitional equality.</li>
@@ -98,7 +98,7 @@ succ n = λα z s. s (n α z s)</code></pre>
 <pre><code> Γ, y:∀j.B ‌⊢ s : ∀i.A[y@i/x]
 –––––––––––––––––––––––––––––– name-app-var
     Γ,j,x:B ⊢ s@j : A[j/i]</code></pre>
-<p>This trick is due to Simon Huber. It makes the name application rule quite tricky: the type of some varables change “under your feet” as you use it. However, the alternatives that I know of are even worse, so we’ll stick to it and be careful.</p>
+<p>This trick makes the name application rule quite tricky: the type of some varables change “under your feet” as you use it. However, the alternatives that I know of are even worse, so we’ll stick to it and be careful.</p>
 <p>Here are the conversion rules:</p>
 <p><code>(&lt;i&gt;t)@0 = t[0/i]</code> <code>(&lt;i&gt;t)@1 = t[1/i]</code> <code>(&lt;i&gt;t)@j = t[j/i]</code> <code>&lt;i&gt;(t@i) = t</code></p>
 <p>Remark: in reality, the rules so far say nothing about lines or cubes. They admit models that only talk about an abstract notion of names. I posit that, if we were to omit the designated special names 0 and 1, the type-theory so far should be quite useful to represent nominal objects.</p>
@@ -161,7 +161,7 @@ q : P x
 ––––––––––––––––––––––––––––– subst
 coe q (&lt;i&gt;P (x,y,p)@i) : P y</code></pre>
 <p>The conversion rules for <code>↑</code> are:</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><code>(t ↑ A)@0 = t</code></li>
 <li>A case analysis on the second argument (the line type):</li>
 </ol>
@@ -170,9 +170,9 @@ s    ↑ &lt;i&gt;((x:A) → B)            =  &lt;i&gt;λx. (s x@0 ↑ &lt;i&gt;
 u    ↑ &lt;i&gt;(&lt;j&gt;A@i@j–→(s0,s)@i)   =  &lt;i&gt;(&lt;j&gt;((s0,u) ↑ &lt;i&gt; A@i@j)@i)!
 &lt;j&gt;t ↑ &lt;i&gt;∀j.A                   =  &lt;i&gt;&lt;j&gt; (t@i ↑ &lt;j&gt;A) ???</code></pre>
 <p>I leave out two cases.</p>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><p>Arbitrary relations (ΨR). Indeed, there is no way to use an arbitrary relation R as a lifting. So parametricity is not miscible with extensionality.</p></li>
-<li><p>Paths (s←–A–→t). This is somewhat trickier; but there is a-priori no way to compute the lifting of a path along another path. Consider: <code>u ↑    &lt;i&gt;((s0,s1,s)@i←–&lt;j&gt;A@i@j–→(t0,t1,t)@i)</code>. We have:</p></li>
+<li><p>Paths (s←–A–→t). This is somewhat trickier; but there is a-priori no way to compute the lifting of a path along another path. Consider: <code>u ↑ &lt;i&gt;((s0,s1,s)@i←–&lt;j&gt;A@i@j–→(t0,t1,t)@i)</code>. We have:</p></li>
 </ol>
 <pre><code>u  : s0 ←–&lt;j&gt;A@0@j–→ t0
 s  : s0 ←–&lt;i&gt;A@i@0–→ s1
@@ -226,7 +226,7 @@ R2
 |
 v
 C &lt;-------- R3 ----------&gt; D</code></pre>
-<ol style="list-style-type: decimal">
+<ol type="1">
 <li><p>The path A to D is R3 ∘ R2 ∘ R1.</p></li>
 <li><p>The interior of the square is a type-path, with</p></li>
 </ol>

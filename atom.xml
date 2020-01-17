@@ -8,8 +8,24 @@
         <name>Jean-Philippe Bernardy</name>
         <email>jeanphilippe.bernardy@gmail.com</email>
     </author>
-    <updated>2018-02-17T00:00:00Z</updated>
+    <updated>2020-01-16T00:00:00Z</updated>
     <entry>
+    <title>Yet Another Keyboard</title>
+    <link href="http://jyp.github.io/posts/yak1.html" />
+    <id>http://jyp.github.io/posts/yak1.html</id>
+    <published>2020-01-16T00:00:00Z</published>
+    <updated>2020-01-16T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Long-Term Review of Keyboardio Model 01</title>
+    <link href="http://jyp.github.io/posts/KeyboardioY2.html" />
+    <id>http://jyp.github.io/posts/KeyboardioY2.html</id>
+    <published>2019-04-03T00:00:00Z</published>
+    <updated>2019-04-03T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
     <title>Review of Keyboardio Model 01</title>
     <link href="http://jyp.github.io/posts/Keyboardio.html" />
     <id>http://jyp.github.io/posts/Keyboardio.html</id>
