@@ -8,8 +8,16 @@
         <name>Jean-Philippe Bernardy</name>
         <email>jeanphilippe.bernardy@gmail.com</email>
     </author>
-    <updated>2020-02-01T00:00:00Z</updated>
+    <updated>2020-03-08T00:00:00Z</updated>
     <entry>
+    <title>Initial And Final Free Structures</title>
+    <link href="https://jyp.github.io/posts/free-structures.html" />
+    <id>https://jyp.github.io/posts/free-structures.html</id>
+    <published>2020-03-08T00:00:00Z</published>
+    <updated>2020-03-08T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
     <title>Designing an Ergo Keyboard (with Haskell and OpenSCAD)</title>
     <link href="https://jyp.github.io/posts/yak2.html" />
     <id>https://jyp.github.io/posts/yak2.html</id>
