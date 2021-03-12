@@ -1,5 +1,0 @@
-#+TITLE: Programming Paradigms: Schedule and administrative information
-#+EMAIL: bernardy@chalmers.se
-#+STYLE: <link rel="stylesheet" type="text/css" href="pp.css" />
-
-retired page.
