@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>The Spume of Years  - A dual view of testing of (polymorphic) programs</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>A dual view of testing of (polymorphic) programs</h1>
+
+            <div class="info">
+    Last updated on January  3, 2017
+    
+</div>
+<div class="info">
+    
+        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>
+    
+</div>
+
+<h1 id="background">Background</h1>
+<p>One can define testing as the activity of generating an environment <span class="math inline"><em>ρ</em></span> for a program, and then verifying if the running the program in <span class="math inline"><em>ρ</em></span> yields the expected results.</p>
+<p>In a typed programming language, testing can be automated in the following way. Assuming that we have a function <span class="math inline"><em>f</em></span> taking an argument of type <span class="math inline"><em>A</em></span>, then we can generate mechanically elements of the type <span class="math inline"><em>A</em></span>, feed them to <span class="math inline"><em>f</em></span> and check that it behaves well. Even though in general mechanical testing will not test all the possible values for <span class="math inline"><em>A</em></span>, in practice it is often useful to test programs for a few small example environments.</p>
+<p>For simplification purposes, let us assume that we are only interested in testing that <span class="math inline"><em>f</em></span> terminates without crashing. In this context we can further assume that <span class="math inline"><em>f</em></span> does not return any meaningful result (besides termination). Writing the type of terminating programs as <span class="math inline">⊥</span>, we can then write this fact as <span class="math inline"><em>f</em> : <em>A</em> → ⊥</span>. As we have seen, in such a case, generating the environment is as simple as finding inhabitants of <span class="math inline"><em>A</em></span>.</p>
+<h1 id="proposition-and-types-and-generalization-of-environments">Proposition and types and generalization of environments</h1>
+<p>In classical logic, every proposition <span class="math inline"><em>T</em></span> has a dual, which we write <span class="math inline"> ∼ <em>T</em></span>. As logicians have shown, one can interpret propositions as types, and proofs as programs. For classical logics, this interpretation may be achieved via Girard’s linear logic. One can also use double-negation embeddings. Given such an interpretation, if we have both a program <span class="math inline"><em>p</em></span> of type <span class="math inline"><em>T</em></span> and an environment <span class="math inline"><em>e</em></span> of type <span class="math inline"> ∼ <em>T</em></span> then <span class="math inline"><em>e</em></span> is a valid environment for <span class="math inline"><em>p</em></span>. That is, <span class="math inline"><em>p</em></span> should terminate when run in environment <span class="math inline"><em>e</em></span>, if both <span class="math inline"><em>p</em></span> and <span class="math inline"><em>e</em></span> are bug-free.</p>
+<p>We define the dual of a type by structural induction, as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td><span class="math inline"> ∼ (<em>A</em> → <em>B</em>)</span></td>
+<td><span class="math inline"> = <em>A</em> ×  ∼ <em>B</em></span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline"> ∼ (<em>A</em> × <em>B</em>)</span></td>
+<td><span class="math inline"> = <em>A</em> →  ∼ <em>B</em></span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline"> ∼ (∀<em>α</em>.<em>A</em>)</span></td>
+<td><span class="math inline"> = ∃<em>α</em>. ∼ <em>A</em></span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline"> ∼ (∃<em>α</em>.<em>A</em>)</span></td>
+<td><span class="math inline"> = ∀<em>α</em>. ∼ <em>A</em></span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline"> ∼ (⊥)</span></td>
+<td><span class="math inline"> = 1</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline"> ∼ (1)</span></td>
+<td><span class="math inline"> = ⊥</span></td>
+</tr>
+</tbody>
+</table>
+<p>Example: assuming <span class="math inline"><em>f</em> : <em>I</em><em>n</em><em>t</em> → ⊥</span>, then the corresponding environment has type <span class="math inline"><em>I</em><em>n</em><em>t</em> × 1</span>. In testing terms, it means that if we generate an integer and a unit value, <span class="math inline"><em>f</em></span> should terminate on that input. (The unit value is only there to check for termination.) If it turns out that <span class="math inline"><em>f</em></span> is intended to accept only a subset of integers, then this contract should be reflected in its type.</p>
+<p>Remark: for higher-order languages the types of programs and environments are the same.</p>
+<h1 id="first-rank-polymorphism">(First-rank) Polymorphism</h1>
+<p>For languages without polymorphism (even higher-order languages), the problem of type-inhabitation is decidable: one can simply try all possibilities. So is the generation of environments: and one can use a similar strategy to generate environments for testing.</p>
+<p>Yet, one often wants to test programs whose type have type-variables. In many cases, these are universally quantified at the top-level only, and so the type-inhabitation problem remains the same. Unfortunately, by duality, the type-variables of the environment are not quantified unverstally, but <em>existentially</em>. Thus, we face another problem: the (automatic) generation of types.</p>
+<p>Fortunately, the type-generation problem is also an opportunity. Indeed, the type to generate is abstract for the program under test. This abstraction property means that the program can never examine the values generated, instead it can only feed them back to the environment itself for further processing. The opportunity is to make the generated type to contain as little information as possible, inorder to cover as many concrete tests cases in one go<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>The task is thus to find a type which can contain all the possible environments. In the following I propose a new method to do so. For every existentially quantified type-variable <span class="math inline"><em>α</em></span>, we define a type <span class="math inline"><em>T</em><em>y</em>(<em>α</em>)</span> as the smallest type inductively generated by a number of constructors. A sufficient set of constructors is generated by structural induction over types, as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">⟦∃<em>α</em>.<em>T</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = ⟦<em>T</em>⟧<sub><em>Γ</em></sub></span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">⟦∀<em>α</em>.<em>T</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = ⟦<em>T</em>⟧<sub><em>Γ</em></sub></span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">⟦<em>A</em> × <em>B</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = ⟦<em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧<sub><em>Γ</em></sub></span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">⟦<em>A</em> → <em>B</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = ⟦ ∼ <em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧<sub>(<em>Γ</em>, <em>x</em> : <em>A</em>)</sub></span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">⟦<em>α</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = {<em>κ</em> : <em>Γ</em> → <em>α</em>}</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">⟦ ∼ <em>α</em>⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = {}</span></td>
+</tr>
+<tr class="odd">
+<td><span class="math inline">⟦1⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = {}</span></td>
+</tr>
+<tr class="even">
+<td><span class="math inline">⟦⊥⟧<sub><em>Γ</em></sub></span></td>
+<td><span class="math inline"> = {}</span></td>
+</tr>
+</tbody>
+</table>
+<p>The key idea is the following. During the generation of an environment, we may need to generate a value of type <span class="math inline"><em>T</em><em>y</em>(<em>α</em>)</span> given a context <span class="math inline"><em>Γ</em></span> of variables in scope. But, we also know that this value can only be consumed later by another part of the environment. Thus, instead of generating all possible programs, generating many possible types, and store that in <span class="math inline"><em>T</em><em>y</em>(<em>α</em>)</span>, we instead store <span class="math inline"><em>Γ</em></span> itself, and let further parts of the environment (those taking <span class="math inline"><em>T</em><em>y</em>(<em>α</em>)</span> as input) deal with the generation of suitable values of concrete (known) types. Any program that we can possibly generate from the values in the environment will thus be captured.</p>
+<p>Technically, whenever a function is encountered, we add the type to a context <span class="math inline"><em>Γ</em></span>. When we reach a type variable, we generate a constructor (<span class="math inline"><em>κ</em></span>) allowing to store the whole context. Crucially, to deal with a function type <span class="math inline"><em>A</em> → <em>B</em></span>, we dualize the domain <span class="math inline"><em>A</em></span> in the recursive case.</p>
+<p>Example: consider <span class="math inline"><em>p</em> : ∀<em>α</em>.(<em>α</em> → <em>α</em>) → <em>α</em> → ⊥</span>. We should generate <span class="math inline"><em>e</em> : ∃<em>α</em>.(<em>α</em> → <em>α</em>) × <em>α</em> × 1</span>. We obtain two constructors, as follows:</p>
+<table>
+<tbody>
+<tr class="odd">
+<td><span class="math inline">⟦(<em>α</em> → <em>α</em>) × <em>α</em> × 1⟧</span></td>
+<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ ⟦<em>α</em>⟧ ∪  × ⟦1⟧</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ {<em>κ</em>₂ : <em>α</em>} ∪  × {}</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline"> = ⟦ ∼ <em>α</em>⟧ ∪ ⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline"> = {} ∪ ⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
+</tr>
+<tr class="odd">
+<td></td>
+<td><span class="math inline"> = {<em>κ</em>₁ : <em>α</em> → <em>α</em>} ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
+</tr>
+<tr class="even">
+<td></td>
+<td><span class="math inline"> = {<em>κ</em>₁ : <em>α</em> → <em>α</em>, <em>κ</em>₂ : <em>α</em>}</span></td>
+</tr>
+</tbody>
+</table>
+<p>Thus <span class="math inline"><em>T</em><em>y</em>(<em>α</em>)</span> is isomorphic to inductive naturals.</p>
+<p>One can add a couple of remarks.</p>
+<ol>
+<li><p>The rule for <span class="math inline"> ∼ <em>α</em></span> does not generate any constructor, because it corresponds to the consumption of <span class="math inline"><em>α</em></span>.</p></li>
+<li><p>The above method works even for for arbitrary-rank polymorphism (hence the rules for ∃ and ∀).</p>
+<p>However, for such languages, finding a single value for an arbitrary type <span class="math inline"><em>A</em></span> is in general undecidable, so it is not clear if such a generalization is very useful.</p></li>
+</ol>
+<p>Instead of generating constructors of an inductive datatype, we could also generate co-patterns of a co-inductive datatype, dualizing the whole process. The dualization may introduce interesting testing trade-offs. In general, if there are many ways to construct <span class="math inline"><em>α</em></span>, but few ways to convert it back to a concrete value, it is best to generate inductive types. On the contrary, if there are few ways to construct <span class="math inline"><em>α</em></span>, but many ways to convert it back to a concrete value, a co-inductive type is better.</p>
+<h1 id="related-work">Related work</h1>
+<p>In earlier work, Patrik, Koen and I have exposed how the above works on a special case. While this note generalises the idea, I recommend the earlier paper<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> for motivation, intution and further applications.</p>
+<p>Recently Xia Li-yao has implemented <a href="https://github.com/Lysxia/metamorph">a monomorphizer</a> for testing functions, citing our work as inspiration. Their work appears to work by structural induction over types, yet at the time of writing the relation with the method presented here is unclear.</p>
+<h1 id="references">References</h1>
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p><a href="http://publications.lib.chalmers.se/records/fulltext/local_99387.pdf">Testing Polymorphic Properties</a>, Bernardy, Jansson and Claessen.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2" role="doc-endnote"><p><a href="http://publications.lib.chalmers.se/records/fulltext/local_99387.pdf">Testing Polymorphic Properties</a>, Bernardy, Jansson and Claessen.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

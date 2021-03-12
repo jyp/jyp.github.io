@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>The Spume of Years  - My Cubical Type-Theory</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>My Cubical Type-Theory</h1>
+
+            <div class="info">
+    Last updated on August 27, 2015
+    
+        by Jean-Philippe Bernardy
+    
+</div>
+<div class="info">
+    
+        Tags: 
+    
+</div>
+
+<h1 id="motivation">Motivation</h1>
+<p>Once upon a time I stumbled upon a piece by Phil Wadler where he shows that deductive natural numbers satisfy the principle of induction.</p>
+<p>Here is the definition of deductive natural numbers:</p>
+<pre><code>Nat : Type
+Nat = (α : Type) → α → (α → α) → α
+
+zero : Nat
+zero = λα z s. z
+
+succ : Nat -&gt; Nat
+succ n = λα z s. s (n α z s)</code></pre>
+<p>And here is the principle of induction:</p>
+<pre><code>Induction = (x : Nat) -&gt; P zero -&gt; ((m : Nat) -&gt; P m -&gt; P (succ m)) -&gt; P x</code></pre>
+<p>Folklore has it that the principle of induction is irreducible: if you try to prove it, then you have to suppose an underlying principle of induction somewhere else.</p>
+<p>Thus, Wadler’s remark is quite intriguing, because one seemingly gets induction out of nowhere. However, Wadler’s proofs relies on both: 1. parametricity and 2. extensionality. Thus, when I first learned about Wadlers’ remark, I was not too surprised: neither parametricity nor extensionality where supported in proof assisstants; it was therefore impossible to prove <code>Induction</code>.</p>
+<p>However, later on, we managed to construct a type-theory with internal parametricity. Several type-theories with extensionality have sprung up as well. However, until recently, it was not clear how to mix the two in a single consistent model.</p>
+<p>In this note, I will outline a type-theory which supports both aspects.</p>
+<h1 id="back-to-basics">Back To Basics</h1>
+<p>I’ll be assuming the usual common base for type theories, which can be summed as follows:</p>
+<ol type="1">
+<li>Types are types. I won’t care about universe levels here: the usual story applies.</li>
+<li>You can get stuff out of the context</li>
+<li>There is a decidable relation of conversion between terms, which gives a notion of definitional equality.</li>
+</ol>
+<pre><code>                             x:A  ∈ Γ                Γ ⊢ t : A   A = B
+ ––––––––––––– ax         ––––––––––––– var       –––––––––––––––––––– conv
+   Γ ⊢ U : U                Γ ⊢ x : A                 Γ ⊢ t : B
+</code></pre>
+<p>We can then also assume a type of (dependent) functions. Here are its formation, introduction and elimination rules.</p>
+<pre><code>                                                                 Γ ⊢ t : A
+  Γ ⊢ A:U Γ,x:A ⊢ B : U            Γ, x:A ⊢ t : B                Γ ⊢ s : (x:A) → B
+ ––––––––––––––––––––––– Π    –––––––––––––––––––––––– abs     –––––––––––––––––––– app
+   Γ ⊢ (x:A) → B : U           Γ ⊢ λx. t : (x:A) → B             Γ ⊢ s t : B[t/x]
+</code></pre>
+<p>The only conversion rules are β and η reduction:</p>
+<p><code>(λx. t) u = t[u/x]</code> and <code>(λx. t x) = t</code> when <code>x</code> does not occur in <code>t</code>.</p>
+<h1 id="nominal-type-theory">Nominal Type Theory</h1>
+<p>The key idea is that we want to define terms that have (hyper-) cubical shapes. To be able to do this we need terms that depend on an interval, say <code>[0,1]</code>. Depending on an interval generates a line, depending on two intervals generates a square, depending on three intervals generates a cube, and so on.</p>
+<p>Here is are formation, introduction rules for lines. We use the letters <code>i,j</code> for variables that range over intervals. We will call such variables <em>names</em>.</p>
+<pre><code>    Γ,i ⊢ A : U             Γ, i ⊢ t : A
+ ––––––––––––––––– ∀     –––––––––––––––––––––––– name-abs
+   Γ ⊢ ∀i.A : U             Γ ⊢ &lt;i&gt; t : ∀i. A</code></pre>
+<p>We will say that a value of type <code>∀i. A</code> is a A-line. In particular, a value of type <code>∀i. U</code> is a line type.</p>
+<p>Application to a constant (<code>0</code>,<code>1</code>) offers no particular surprise:</p>
+<pre><code>Γ ‌⊢ s : ∀i.A
+–––––––––––––––– 0
+Γ ⊢ s@0 : A[0/i]
+
+Γ ‌⊢ s : ∀i.A
+–––––––––––––––– 1
+Γ ⊢ s@1 : A[1/i]</code></pre>
+<p>I want to disallow name aliasing, and therefore will arrange the application to consume the variable that is applied. One possible typing rule is thus:</p>
+<pre><code>Γ ‌⊢ s : ∀i.A
+––––––––––––––––––––– name-app-last
+Γ,j ⊢ s@j : A[j/i]</code></pre>
+<p>However, the above rule can only be used if the name is the last thing introduced in the context (we have dependent types; the order of things in the context matters).</p>
+<p>In order to generalize to arbitrary positions of <code>j</code>, we must be careful. The trick is to abstract the context over <code>j</code>, the name that disappears. Here is how the rule looks like if there is an extra variable introduced after it. (I don’t have good notation for the arbitrary long context.)</p>
+<pre><code> Γ, y:∀j.B ‌⊢ s : ∀i.A[y@i/x]
+–––––––––––––––––––––––––––––– name-app-var
+    Γ,j,x:B ⊢ s@j : A[j/i]</code></pre>
+<p>This trick makes the name application rule quite tricky: the type of some varables change “under your feet” as you use it. However, the alternatives that I know of are even worse, so we’ll stick to it and be careful.</p>
+<p>Here are the conversion rules:</p>
+<p><code>(&lt;i&gt;t)@0 = t[0/i]</code> <code>(&lt;i&gt;t)@1 = t[1/i]</code> <code>(&lt;i&gt;t)@j = t[j/i]</code> <code>&lt;i&gt;(t@i) = t</code></p>
+<p>Remark: in reality, the rules so far say nothing about lines or cubes. They admit models that only talk about an abstract notion of names. I posit that, if we were to omit the designated special names 0 and 1, the type-theory so far should be quite useful to represent nominal objects.</p>
+<h1 id="my-cubical-type-theory">(My) Cubical Type Theory</h1>
+<p>As I see it, the main interest of cubical type-theory is to group objects (<code>a</code>,<code>b</code>) with a useful relation <code>p</code> between them by placing <code>a</code> and <code>b</code> at the borders of a line and <code>p</code> in the interior. In such a situation we will say that <code>p</code> is a path between <code>a</code> and <code>b</code>. Here are my rules for path formation, introduction and elimination.</p>
+<pre><code>                                                                    Γ ⊢ A : ∀i. U
+  Γ ⊢ A : ∀i. U                                                     Γ ⊢ u : Path A s t
+  Γ ⊢ s : A@1                                                       Γ ⊢ s : A@1
+  Γ ⊢ t : A@0                  Γ ⊢ t : ∀i. A                        Γ ⊢ t : A@0
+––––––––––––––––-–––– path  ––---------–––––––––––––––––––––– in  ––––--––––––––––––––––––– line
+  Γ ⊢ Path A s t : U           Γ ⊢ t! : Path (&lt;i&gt;A) t@0 t@1         Γ ⊢ (s,u,t) : ∀i. A@i</code></pre>
+<p>The formation rule says that a path type over the line type A is well formed if the borders have the borders of A as types. The introduction says that from any line, one can get a path between its borders. The elimination rule says that any line yields a path</p>
+<p>Conversion rules:</p>
+<pre><code>(s,u)@0     = s
+(t,u)!      = u
+(t,u!)      = u
+(A,R–→t)    = TODO</code></pre>
+<p>In my opinion, the main interest of this theory is that path relations behave extensionally. Indeed, for any two functions <code>f</code> and <code>g</code> of type <code>(X:A) → B</code>, we have:</p>
+<pre><code>q : (x:A) → (y:A) → (p : x←–&lt;i&gt;A–→y) → f x ←–&lt;i&gt;B–→g y
+–––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+?  :   f←–(&lt;i&gt;(x:A) → B)–→g</code></pre>
+<p>where <code>? = (&lt;i&gt; λx. (f x@0,g x@1,q _ _ x!)@i)!</code> Checking the type is left as an exercise to the reader. Attention: the type of <code>x</code> changes when <code>i</code> is used.</p>
+<p>Other exercise: prove the other direction.</p>
+<h1 id="parametricity">Parametricity</h1>
+<p>Given the above base, we can easily internalise parametricity. We need the ability to turn any relation into a path between the types that it relates. (That may seem strange to those used to CTT; however, remember at this point that our notion of path is rather weak, in particular they do not have substitutivity.)</p>
+<pre><code>Γ ⊢ A : U
+Γ ⊢ P : A → U
+––––––––––––––––––––
+Γ ⊢ ΨP : (&lt;i&gt;U)–→A</code></pre>
+<p>The conversion rule says that a witness for the relation is a proper inhabitant of such a path:</p>
+<p><code>(_,ΨR)–→a = R a</code></p>
+<p>A consequence is that every parametricity theorem is provable within the theory. (The proof of this fact appears <a href="http://www.cse.chalmers.se/~mouling/share/PresheafModelParametericTT.pdf">here</a>; using a somewhat different syntax.) For good measure I will give an example: the proof of parametricity for the identity function type:</p>
+<pre><code>f : (a:U) → a -&gt; a
+A : U
+B : U
+R : A → B → U
+a : A
+b : A
+p : R a b
+––––––––––––––––––––––––
+? : R (f A a) (f B b)</code></pre>
+<p>where <code>? = (&lt;i&gt; f (A,B,ΨR)@i (a,b,p)@i)!</code></p>
+<h1 id="extensionality">Extensionality</h1>
+<pre><code> Γ ⊢ t : A@0
+ Γ ⊢ A : ∀i. U
+––––––––––––––––––– lifting
+ Γ ⊢ t↑A : ∀i. A@i</code></pre>
+<p>This gives both the coercion and the coherence components of OTT, all at once. With the same assumptions:</p>
+<pre><code>coe t A : A@1
+coe t A = (t↑A)@0
+
+coh t A : t←–A–→coe t A
+coh t A = (t↑A)!</code></pre>
+<p>Thus, using the above, we can conveniently construct a substitution principle for paths. Here it is:</p>
+<pre><code>x : A
+y : A
+p : x←–&lt;i&gt;A–→y
+P : A → U
+q : P x
+––––––––––––––––––––––––––––– subst
+coe q (&lt;i&gt;P (x,y,p)@i) : P y</code></pre>
+<p>The conversion rules for <code>↑</code> are:</p>
+<ol type="1">
+<li><code>(t ↑ A)@0 = t</code></li>
+<li>A case analysis on the second argument (the line type):</li>
+</ol>
+<pre><code>A    ↑ &lt;i&gt;U                      =  &lt;i&gt;A
+s    ↑ &lt;i&gt;((x:A) → B)            =  &lt;i&gt;λx. (s x@0 ↑ &lt;i&gt;B)@i
+u    ↑ &lt;i&gt;(&lt;j&gt;A@i@j–→(s0,s)@i)   =  &lt;i&gt;(&lt;j&gt;((s0,u) ↑ &lt;i&gt; A@i@j)@i)!
+&lt;j&gt;t ↑ &lt;i&gt;∀j.A                   =  &lt;i&gt;&lt;j&gt; (t@i ↑ &lt;j&gt;A) ???</code></pre>
+<p>I leave out two cases.</p>
+<ol type="1">
+<li><p>Arbitrary relations (ΨR). Indeed, there is no way to use an arbitrary relation R as a lifting. So parametricity is not miscible with extensionality.</p></li>
+<li><p>Paths (s←–A–→t). This is somewhat trickier; but there is a-priori no way to compute the lifting of a path along another path. Consider: <code>u ↑    &lt;i&gt;((s0,s1,s)@i←–&lt;j&gt;A@i@j–→(t0,t1,t)@i)</code>. We have:</p></li>
+</ol>
+<pre><code>u  : s0 ←–&lt;j&gt;A@0@j–→ t0
+s  : s0 ←–&lt;i&gt;A@i@0–→ s1
+t  : t0 ←–&lt;i&gt;A@i@1–→ t1</code></pre>
+<p>or, in a diagram:</p>
+<pre><code>
+s0 &lt;-------- s ----------&gt; s1
+^
+|
+|
+u
+|
+|
+v
+t0 &lt;-------- t ----------&gt; t1
+</code></pre>
+<p>What we have to do is to construct 1. a path from <code>s1</code> to <code>t1</code> 2. the interior of the square</p>
+<p>Leaving out the interior for now, an obvious way to build the path <code>s1</code> to <code>t1</code> is to compose the other paths. However, knowing nothing about the structure of paths, this leaves us no the wiser.</p>
+<p>TODO: J axiom</p>
+<p>x : A P : (y : A) -&gt; Path A x y -&gt; U d : P x x! ————————————————— J(A,P,x,d) : (y : A) -&gt; (e : Path A x y) -&gt; P y e</p>
+<p>J(A,P,x,d) x x! = d</p>
+<h1 id="ott">OTT</h1>
+<p>A possible choice is to assume the uniqueness of paths. If paths are equality proofs, then this assumption is also known as the uniqueness of identity proofs (UIP) or Axiom K. In our framework, we can assert that a path is always constructed using <code>!</code>, and thus if the two ends of a line are equal (say <code>x</code>), we can replace the path by <code>(&lt;i&gt;x)!</code>. So, we have:</p>
+<pre><code>(x,x,_) = (x,x,(&lt;i&gt;x)!) = &lt;i&gt;x</code></pre>
+<h1 id="isos">Isos</h1>
+<p>If we do not want UIP, a popular choice is to allow isomorphisms to generate paths. This situation is intermediate between parametricity and UIP. I don’t really know how to define isomorphism without resorting to an underlying notion of equality, so I’ll just take the parametricity case and add exactly the needed requirements to be able to do lifting.</p>
+<pre><code>Γ ⊢ A : U
+Γ ⊢ B : U
+Γ ⊢ R : A → B → U
+Γ ⊢ f : A → B
+Γ ⊢ g : B → A
+Γ ⊢ p : (x:A) → R x (f x)
+Γ ⊢ q : (x:B) → R (g x) x
+–––––––––––––––––––––––––––
+Γ ⊢ ⟨R,f,g,p,q⟩ : A←–&lt;i&gt;U–→B</code></pre>
+<p>with</p>
+<p><code>a←–(_,_,⟨R,_,_,_,_⟩)–→b = R a b</code></p>
+<p>We can lift using the above, like so:</p>
+<pre><code>s ↑ (_,_,⟨R,f,_,p,_⟩)  =  (s, f s, p s)</code></pre>
+<p>We can also compose the so-constructed paths:</p>
+<pre><code>⟨R2,f2,g2,p2,q2⟩ ∘ ⟨R1,f1,g1,p1,q1⟩ =
+  ⟨R2∘R1,f2∘f1,g1∘g2,(p2 (f1 x),p1 x),(q1 (g2 x),q2 x)⟩  =</code></pre>
+<p>where <code>(R∘S) x y = ∃z.  R x z × S z y</code></p>
+<p>We can then explain how to complete the square.</p>
+<pre><code>B &lt;-------- R1 ----------&gt; A
+^
+|
+|
+R2
+|
+|
+v
+C &lt;-------- R3 ----------&gt; D</code></pre>
+<ol type="1">
+<li><p>The path A to D is R3 ∘ R2 ∘ R1.</p></li>
+<li><p>The interior of the square is a type-path, with</p></li>
+</ol>
+<ul>
+<li>A = R2</li>
+<li>B = R3 ∘ R2 ∘ R1</li>
+<li>R = full relation</li>
+<li>For f, we have to tuple up the witnesses of the relations for each of the three sides</li>
+<li>For g, we discard the irrelevant components of the tuple</li>
+<li>p and q are trivial.</li>
+</ul>
+<p>This whole process allows to reduce the lifting of paths</p>
+<h1 id="acknowledgement">Acknowledgement</h1>
+<p>Conor McBride pointed out an error in an eariler version of this sketch.</p>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

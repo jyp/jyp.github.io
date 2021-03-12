@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <title>JP's blog latest posts</title>
+    <link href="https://jyp.github.io/atom.xml" rel="self" />
+    <link href="https://jyp.github.io" />
+    <id>https://jyp.github.io/atom.xml</id>
+    <author>
+        <name>Jean-Philippe Bernardy</name>
+        <email>jeanphilippe.bernardy@gmail.com</email>
+    </author>
+    <updated>2020-03-08T00:00:00Z</updated>
+    <entry>
+    <title>Initial And Final Free Structures</title>
+    <link href="https://jyp.github.io/posts/free-structures.html" />
+    <id>https://jyp.github.io/posts/free-structures.html</id>
+    <published>2020-03-08T00:00:00Z</published>
+    <updated>2020-03-08T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Designing an Ergo Keyboard (with Haskell and OpenSCAD)</title>
+    <link href="https://jyp.github.io/posts/yak2.html" />
+    <id>https://jyp.github.io/posts/yak2.html</id>
+    <published>2020-02-01T00:00:00Z</published>
+    <updated>2020-02-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Yet Another Keyboard</title>
+    <link href="https://jyp.github.io/posts/yak1.html" />
+    <id>https://jyp.github.io/posts/yak1.html</id>
+    <published>2020-01-16T00:00:00Z</published>
+    <updated>2020-01-16T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Long-Term Review of Keyboardio Model 01</title>
+    <link href="https://jyp.github.io/posts/KeyboardioY2.html" />
+    <id>https://jyp.github.io/posts/KeyboardioY2.html</id>
+    <published>2019-04-03T00:00:00Z</published>
+    <updated>2019-04-03T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Review of Keyboardio Model 01</title>
+    <link href="https://jyp.github.io/posts/Keyboardio.html" />
+    <id>https://jyp.github.io/posts/Keyboardio.html</id>
+    <published>2018-02-17T00:00:00Z</published>
+    <updated>2018-02-17T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Wing Tsun Gothenburg -- programme</title>
+    <link href="https://jyp.github.io/posts/wt-program.html" />
+    <id>https://jyp.github.io/posts/wt-program.html</id>
+    <published>2017-10-29T00:00:00Z</published>
+    <updated>2017-10-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Introducing Styx</title>
+    <link href="https://jyp.github.io/posts/styx.html" />
+    <id>https://jyp.github.io/posts/styx.html</id>
+    <published>2017-01-04T00:00:00Z</published>
+    <updated>2017-01-04T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>A dual view of testing of (polymorphic) programs</title>
+    <link href="https://jyp.github.io/posts/polytest-two.html" />
+    <id>https://jyp.github.io/posts/polytest-two.html</id>
+    <published>2017-01-03T00:00:00Z</published>
+    <updated>2017-01-03T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Concurrency in elisp via CPS</title>
+    <link href="https://jyp.github.io/posts/elisp-cps.html" />
+    <id>https://jyp.github.io/posts/elisp-cps.html</id>
+    <published>2016-11-01T00:00:00Z</published>
+    <updated>2016-11-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Controlling Fusion In Haskell</title>
+    <link href="https://jyp.github.io/posts/controlled-fusion.html" />
+    <id>https://jyp.github.io/posts/controlled-fusion.html</id>
+    <published>2016-02-29T00:00:00Z</published>
+    <updated>2016-02-29T00:00:00Z</updated>
+    <summary type="html"><![CDATA[How to write Haskell code in a way that lets the programmer control when fusion happens.]]></summary>
+</entry>
+<entry>
+    <title>HOWTO --- Nix for Haskell Development</title>
+    <link href="https://jyp.github.io/posts/nix.html" />
+    <id>https://jyp.github.io/posts/nix.html</id>
+    <published>2015-06-15T00:00:00Z</published>
+    <updated>2015-06-15T00:00:00Z</updated>
+    <summary type="html"><![CDATA[A HOWTO on using nix for Haskell development.]]></summary>
+</entry>
+<entry>
+    <title>Towards The Prettiest Printer</title>
+    <link href="https://jyp.github.io/posts/towards-the-prettiest-printer.html" />
+    <id>https://jyp.github.io/posts/towards-the-prettiest-printer.html</id>
+    <published>2015-05-01T00:00:00Z</published>
+    <updated>2015-05-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[On defining an even prettier printer]]></summary>
+</entry>
+
+</feed>

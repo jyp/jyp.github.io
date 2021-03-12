@@ -1,0 +1,283 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>The Spume of Years  - Towards The Prettiest Printer</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Towards The Prettiest Printer</h1>
+
+            <div class="info">
+    Last updated on May  1, 2015
+    
+        by Jean-Philippe Bernardy
+    
+</div>
+<div class="info">
+    
+        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>
+    
+</div>
+
+<p>Popular Haskell pretty printers have given me less-than-optimal results. This is especially disappointing, as they seem to be the epitome of functional programs, blessed with the correct-by-construction methodology of program development. In this note I review why I find the current solutions sub-optimal, and propose a satisfactory alternative.</p>
+<h1 id="the-state-of-the-art.">The state of the art.</h1>
+<p>Even today, pretty printing in Haskell is mostly backed by two classic libraries, either:</p>
+<ol type="1">
+<li><p>The Hughes-Peyton Jones library. The design is <a href="http://belle.sourceforge.net/doc/hughes95design.pdf">described by Hughes</a> in <em>The Design of a Pretty-printing Library</em>. It has then been adopted (and modified) by Peyton Jones, and was distributed with GHC for a long time, making it the <em>de-facto</em> standard pretty printer. It is now available on Hackage in the <a href="https://hackage.haskell.org/package/pretty">pretty</a> package. I believe that this remains the dominant design, perhaps disputed by…</p></li>
+<li><p>The Wadler-Leijen library. In the penultimate chapter of <em>The Fun of Programming</em>, Wadler re-constructs a pretty printing library from scratch. Keeping true to Hughes in particular and the general functional programming tradition in general, Wadler starts by specifying his library using equational laws, and derives an implementation. Leijen took Wadler’s implementation and modified it to increase its expressivity (but more on that later). The result is available in the eponymous <a href="https://hackage.haskell.org/package/wl-pprint">wl-pprint</a> package.</p></li>
+</ol>
+<h2 id="not.-pretty.-enough.">Not. Pretty. Enough.</h2>
+<p>As it happens, I am dissatisfied with the outputs produced by either libraries. At the risk of appearing ungrateful to the masters, I’ll spend some effort to back this claim.</p>
+<h3 id="hughes">Hughes</h3>
+<p>Let us assume we want to pretty print S-Expressions:</p>
+<pre class="example"><code>data SExpr where
+  SExpr :: [SExpr] -&gt; SExpr
+  Atom :: String -&gt; SExpr</code></pre>
+<p>We’d like to allow to pretty print an S-Expr either horizontally, like so:</p>
+<pre class="example"><code>(a b c d)</code></pre>
+<p>or vertically, like so:</p>
+<pre class="example"><code>(a
+ b
+ c
+ d)</code></pre>
+<p>(I’ll refrain the urge to be more specific at this point).</p>
+<p>For the sake of the argument, let’s pretend we want to pretty print the following s-expr:</p>
+<pre class="example"><code>abcd = SExpr $ map (Atom . (:[])) &quot;abcd&quot;
+abcd4 = SExpr [abcd,abcd,abcd,abcd]
+testData = SExpr [Atom &quot;axbxcxd&quot;, abcd4] </code></pre>
+<p>Printed on a wide page, we’d get:</p>
+<pre class="example"><code>(axbxcxd ((a b c d) (a b c d) (a b c d) (a b c d) (a b c d)))</code></pre>
+<p>In a narrow page (whose width is indicated by the row of hashes), what we’d get from Hughes’ library is the following output:</p>
+<pre class="example"><code>###############
+(axbxcxd ((a
+           b
+           c
+           d)
+          (a
+           b
+           c
+           d)
+          (a
+           b
+           c
+           d)
+          (a
+           b
+           c
+           d)
+          (a
+           b
+           c
+           d)))
+###############</code></pre>
+<p>This does not quite cut it. Our senses of aesthetics are tingling… this is not pretty enough. Why can’t we get the following?</p>
+<pre class="example"><code>###############
+(axbxcxd
+ ((a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d))</code></pre>
+<p>The thing is, Hughes believes that “it would be unreasonably inefficient for a pretty-printer do decide whether or not to split the first line of a document on the basis of the content of the last.” (sec. 7.4 of his paper). Therefore, he chooses a greedy algorithm, which tries to fit as much as possible on a single line, without regard for what comes next. In our example, the algorithm fits <code>(axbxcxd ((a</code>, but then it has committed to a very deep indentation level, which forces a less-than-pretty outcome for the remainder of the document.</p>
+<h3 id="wadler">Wadler</h3>
+<p>Wadler’s design fares somewhat better. It does not suffer from the above problem… <em>by default</em>. That is, it lacks the capability to express that sub-documents should be vertically aligned — compositionally.</p>
+<p>Let us illustrate. Using Wadler’s library, one might specify pretty printing of s-exprs as follows (see Wadler’s paper is there is any doubt on the meaning of the following):</p>
+<pre class="example"><code>x &lt;/&gt; y = x &lt;&gt; line &lt;&gt; y
+sep = foldr empty (&lt;/&gt;)</code></pre>
+<pre class="example"><code>pretty (SExpr xs) = group $ &quot;(&quot; &lt;&gt; nest 1 (sep $ map pretty xs) &lt;&gt; &quot;)&quot;
+pretty (Atom x) = text x</code></pre>
+<p>which appears to do the trick. Indeed, we get:</p>
+<pre class="example"><code>###############
+(axbxcxd
+ ((a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d))</code></pre>
+<p>However, the <code>group</code> combinator does not quite behave as I’d like. What <code>group</code> does is to allow its argument to be laid out on a single line, instead of multiple ones. Hence, we can put two elements next to each other <em>only if</em> they are flattened. This means that if we typeset the same s-expr, but in a slightly wider page, we get the same output:</p>
+<pre class="example"><code>#####################
+(axbxcxd
+ ((a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d)
+  (a b c d))</code></pre>
+<p>whereas I crave something more pleasing to the eye:</p>
+<pre class="example"><code>#####################
+(axbxcxd ((a b c d)
+          (a b c d)
+          (a b c d)
+          (a b c d)
+          (a b c d))</code></pre>
+<p>At this point, the reader may raise two objections:</p>
+<ul>
+<li><p>Objection 1: <em>All this fuss for ONE LINE?</em></p></li>
+<li><p>Reply 1: Every computer-science academic has once in their lifetime been in a killing mood due to a one-line-to-long printout causing a paper to spill over the page limit. So that extra line saved <em>is</em> worth something. Plus, we can construct examples where more space can be saved.</p></li>
+<li><p>Objection 2: <em>Leijen’s extension of Wadler’s design solves the issue: it provides an <code>align</code> combinator.</em></p></li>
+<li><p>Reply 2: Yes, but: it exhibits the same symptoms as Hughes’ library.</p>
+<p>Aside: In his paper, Wadler proves that his library produces the shortest output. But, Leijen’s extension breaks this invariant. This makes me suspect that the extension was done on the implementation directly rather than on the design.</p></li>
+</ul>
+<h1 id="the-search-for-the-prettiest-output">The search for the prettiest output</h1>
+<h2 id="api">API</h2>
+<p>Before discussing possible algorithms, we need to chose wisely the the document-description language that we accept. Daringly standing on Phil’s strong shoulders, I propose the following set of combinators:</p>
+<ul>
+<li><code>empty</code>: The empty document</li>
+<li><code>(&lt;&gt;)</code>: concatenation</li>
+<li><code>line</code>: insert a new line (unconditionally)</li>
+<li><code>text</code>: insert a meaningful piece of text</li>
+<li><code>nest</code>: nest the argument</li>
+<li><code>align</code>: align the documents in the argument</li>
+<li><code>(&lt;|&gt;)</code>: disjunction of layouts</li>
+<li><code>spacing</code>: non-meaningful text (spaces or typographical marks)</li>
+</ul>
+<p>We can represent the above API in a data type, as follows:</p>
+<pre class="example"><code>data Doc where
+  Line :: Doc
+  Nil :: Doc
+  (:&lt;&gt;) :: Doc -&gt; Doc -&gt; Doc
+  Text :: String -&gt; Doc
+  Nest :: Int -&gt; Doc -&gt; Doc
+  Align :: Doc -&gt; Doc
+  (:&lt;|&gt;) :: Doc -&gt; Doc -&gt; Doc -- ^ Attn: INVARIANT
+  Spacing :: String -&gt; Doc</code></pre>
+<p>Compared to Wadler (and <em>a-fortiori</em> Hughes) the above API is very liberal in the typesetting strategies that it can express. Indeed, the user can use a fully-general disjunction operator <code>(&lt;|&gt;)</code>, which accepts arbitrary documents as arguments. A downside is that it leaves the user responsible to give two documents that differ only in layout: they must have the same <code>contents</code>.</p>
+<pre class="example"><code>contents :: Doc -&gt; [String]
+contents (Spacing _) = []
+contents Nil = []
+contents Line = []
+contents (d1 :&lt;&gt; d2) = contents d1 &lt;&gt; contents d2
+contents (Text x) = [x]
+contents (Align x) = contents x
+contents (x :&lt;|&gt; y) = contents x</code></pre>
+<p>(Note that the <code>contents</code> function relies on the invariant being verified.)</p>
+<p>Other invariants include that text and spacing may not contain any newline, and nesting may not be negative.</p>
+<h3 id="example">Example</h3>
+<p>Using the above combinators, we can pretty print s-exprs as follows:</p>
+<pre class="example"><code>x &lt;+&gt; y = x &lt;&gt; Spacing &quot; &quot; &lt;&gt; y
+x &lt;/&gt; y = x &lt;&gt; Line &lt;&gt; y</code></pre>
+<pre class="example"><code>sep [] = mempty
+sep xs = foldr1 (&lt;+&gt;) xs :&lt;|&gt; Align (foldr1 (&lt;/&gt;) xs)
+pretty (Atom s) = Text s
+pretty (SExpr xs) = Text &quot;(&quot; &lt;&gt; (sep $ map pretty xs) &lt;&gt; Text &quot;)&quot;</code></pre>
+<p>The <code>sep</code> combinator now precisely expresses what I was after at the beginning: either all the elements are glued horizontally, or they are aligned vertically.</p>
+<h2 id="semantics">Semantics</h2>
+<p>We have our API and an intuition of what it means. Let us make the intuition formal, by specifying how to render documents. I could do as Hughes or Wadler and start by stating a few laws on the API (in particular all laws stated by Wadler should hold). Instead I’ll give the semantics directly, using a compositional interpretation. I will interpret documents as a non-deterministic function from the current indentation level (1st argument) and current column (2nd argument) to a text and a final column.</p>
+<p>Using lists for non-determinism, we have:</p>
+<pre class="example"><code>type Semantics = Int -&gt; Int -&gt; [(String,Int)]</code></pre>
+<p>The interpretation function is then the following.</p>
+<pre class="example"><code>eval :: Doc -&gt; Semantics
+eval (Text s) i c = return (s, c + length s)
+eval (Spacing s) i c = return (s, c + length s)
+eval Nil i c = return (&quot;&quot;,c)
+eval (Align d) i c = eval d c c
+eval (Nest j d) i c = eval d (i+j) c
+eval Line i c = return ('\n' : replicate i ' ', i)
+eval (d1 :&lt;&gt; d2) i c = do
+  (t1,c1) &lt;- eval d1 i c
+  (t2,c2) &lt;- eval d2 i c1
+  return (t1 ++ t2, c2)
+eval (d1 :&lt;|&gt; d2) i c = eval d1 i c ++ eval d2 i c</code></pre>
+<p>Given the use of monadic syntax to handle list-non-determinism, the interpretation of <code>text</code>, <code>spacing</code>, <code>empty</code>, <code>&lt;&gt;</code>, and even <code>&lt;|&gt;</code> reserve no particular surprise. The interesting bit is the interplay between <code>line</code>, <code>nest</code> and <code>align</code>.</p>
+<p>The indentation level is implemented by inserting a certain number of spaces after moving to the next <code>Line</code> (which also resets the current column). <code>Nest</code>-ing is defined by increasing the indentation level. <code>Align</code>-ing means setting the indentation level to the current column. (Exercise: verify that, at all times, <em>c &gt;= i</em>.)</p>
+<p>Finally, we can define the prettiest rendering as that which</p>
+<ul>
+<li>fits the page and</li>
+<li>uses the smallest amount of lines</li>
+</ul>
+<p>(This is not quite the ideal definition: sometimes no layout fits the page, and we want to pick that with the least overflow. But we’ll leave such details to the implementer and stick to the simpler definition given above.)</p>
+<p>Fitting the page means that the line width is less than the page width:</p>
+<pre class="example"><code>maxWidth = maximum . map length . lines
+fits w s = maxWidth s &lt;= w</code></pre>
+<p>The final renderer is thus:</p>
+<pre class="example"><code>height = length . lines
+render w d = minimumBy (compare `on` height) $ filter (fits w) $ map fst $ eval d 0 0</code></pre>
+<p>The above renderer satisfies our needs: it finds the prettiest layout. Yet, we should not expect to get results quickly. A document may contain hundreds of disjunctions, and if we exhaustively search a space that big, even the legendary long-lasting batteries of our iPads(tm) will die before anything can be printed.</p>
+<h2 id="implementation">Implementation</h2>
+<p>Fortunately, there is a way out of this tar-pit. The trick is to explore the search space <em>line by line</em>. That is, every time we find the <code>Line</code> combinator, we stash the current partial result for later examination. Eventually, all pending states will be stashed. We can then <em>prune out</em> useless, dominated states, and resume the search. There remains to define when a state is dominated:</p>
+<p>For each state <em>t</em>, we define:</p>
+<ul>
+<li><em>i(t)</em>: the indentation of the next line (remember that we stopped at a given newline)</li>
+<li><em>p(t)</em>: the progress inside the document, defined as the number of tokens printed so far. Remember that disjuncted documents must have the same contents, so it is meaningful to compare <em>p(t)</em> and <em>p(u)</em> for every pair of states <em>(t,u)</em>.</li>
+</ul>
+<p>Definition: <em>t</em> dominates <em>u</em> iff. <em>i(t) &lt; i(u)</em> and <em>p(t) &gt;= p(u)</em>.</p>
+<p>Heuristic: If <em>t</em> dominates <em>u</em>, and <em>t</em> is a valid state, then <em>u</em> does not generate the prettiest output. The idea is the following: if <em>u</em> is at a higher indentation level, it has less space to print the rest of the document (remember that indentation is always positive). Therefore, if it is also late in the production of tokens, there is no hope for <em>u</em> to catch up with <em>t</em>. There are some pathological cases where things do not go as I outline above, however they are pretty rare: they never occured in the examples that I’ve tried<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>Consequently, if there is a finite number <em>l</em> of indentation levels (traditionally <em>l=79</em>), then we have only to consider at worst <em>l</em> solutions after each line break. There is no exponential blow up.</p>
+<p>For completeness, here is the code implementing the above idea.</p>
+<pre class="example"><code>type Docs = [(Int,Doc)]
+data Process = Process {curIndent :: Int -- current indentation
+                       ,progress :: Int
+                       ,tokens :: [String] -- tokens produced, in reverse order
+                       ,rest :: Docs  -- rest of the input document to process
+                       }
+measure :: Process -&gt; (Int, Int)
+measure Process{..} = (curIndent, negate progress)
+
+filtering :: [Process] -&gt; [Process]
+filtering (x:y:xs) | progress x &gt;= progress y = filtering (x:xs)
+                   | otherwise = x:filtering (y:xs)
+filtering xs = xs
+
+renderFast :: Int -&gt; Doc -&gt; String
+renderFast w doc = concat $ reverse $ loop [Process 0 0 [] $ [(0,doc)]]
+    where
+      loop ps = case dones of
+        (done:_) -&gt; done
+        [] -&gt; case conts of
+          (_:_) -&gt; loop $ filtering $ sortBy (compare `on` measure) $ conts
+          [] -&gt; error &quot;overflow&quot;
+        where
+          ps' = concatMap (\Process{..} -&gt; rall progress tokens curIndent rest) ps
+          (dones,conts) = partitionEithers ps'
+
+      rall :: Int -&gt; [String] -&gt; Int -&gt; Docs -&gt; [Either [String] Process]
+      rall p ts k ds0 | k &gt; w = []
+      rall p ts k ds0 = case ds0 of
+         [] -&gt;  [Left ts] -- Done!
+         (i,d):ds -&gt; case d of
+            Nil       -&gt; rall p ts k ds
+            Text s    -&gt; rall (p+1) (s:ts) (k+length s) ds
+            Spacing s -&gt; rall (p  ) (s:ts) (k+length s) ds
+            Line      -&gt; [Right $ Process i p (('\n':replicate i ' '):ts) ds]
+            x :&lt;&gt; y   -&gt; rall p ts k ((i,x):(i,y):ds)
+            Nest j x  -&gt; rall p ts k ((i+j,x):ds)
+            x :&lt;|&gt; y  -&gt; rall p ts k ((i,x):ds) ++ rall p ts k ((i,y):ds)
+            Align x   -&gt; rall p ts k ((k,x):ds)</code></pre>
+<h1 id="coda">Coda</h1>
+<p>The above has been inspired by two implementations of pretty printers that I’ve made. The first one is a regular pretty printing library, <a href="https://hackage.haskell.org/package/pretty-compact">available on hackage</a> which is a drop-in replacement for the <code>print-wl</code> package, except for a few unsafe functions which I’ve hidden. It implements exaclty the above idea, but handles overflow satisfactorily.</p>
+<p>The second one is part of the <a href="https://hackage.haskell.org/package/marxup">marxup</a> package, which is a Haskell layer on top of the Latex document-preparation system. To see an example of a paper typeset with this technology, follow <a href="http://www.cse.chalmers.se/~bernardy/controlled-array-fusion.pdf">this link</a>.</p>
+<p>Happy pretty printing!</p>
+<!--  LocalWords:  Peyton invariants
+ -->
+<section class="footnotes" role="doc-endnotes">
+<hr />
+<ol>
+<li id="fn1" role="doc-endnote"><p>I originally thought this heurisitic to be a theorem, as shown in earlier versions of this document.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>

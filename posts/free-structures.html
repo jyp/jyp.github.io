@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>The Spume of Years  - Initial And Final Free Structures</title>
+        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+        
+        <link rel="stylesheet" type="text/css" href="../css/home.css" />
+        
+    </head>
+    <body>
+        <div id="header">
+            <div id="logo">
+                <a href="../">Not JP's Blog</a>
+            </div>
+            <div id="navigation">
+                <a href="../">Home</a>
+                <a href="../about.html">About</a>
+                <a href="../contact.html">Contact</a>
+                <a href="../recent.html">Recent</a>
+            </div>
+        </div>
+
+        <div id="content">
+            <h1>Initial And Final Free Structures</h1>
+
+            <div class="info">
+    Last updated on March  8, 2020
+    
+</div>
+<div class="info">
+    
+        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>
+    
+</div>
+
+<p>In this note I show how to construct free structures in Haskell. I show both initial and final structures. I make a brief comparison by example, and point out the relation with some existing implementations. A small generalization is also proposed.</p>
+<p>The code presented below is compilable, but you need a few extensions:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="ot">{-# LANGUAGE FlexibleInstances #-}</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a><span class="ot">{-# LANGUAGE TypeSynonymInstances #-}</span></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a><span class="ot">{-# LANGUAGE ConstraintKinds #-}</span></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a><span class="ot">{-# LANGUAGE GADTs #-}</span></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a><span class="ot">{-# LANGUAGE RankNTypes #-}</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a><span class="ot">{-# LANGUAGE UnicodeSyntax #-}</span></span></code></pre></div>
+<h1 id="free-monoid">Free monoid</h1>
+<p>We’ll show how this is done first on the monoid example. It’s simple enough while having sufficient complexity to illustrate most issues.</p>
+<h2 id="initial-encoding">Initial encoding</h2>
+<p>The idea of a free construction is to add the operations of a given algebraic structure (in this case, a monad) around a set of generators (which need not exhibit the structure). One way to construct a free structure is to have one constructor for each operation in the structure, plus one to embed generators. This is called the “initial” encoding. For a monoid structure, we would have the following:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonoid</span> t <span class="kw">where</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a>  <span class="dt">Mappend</span><span class="ot"> ::</span> <span class="dt">FreeMonoid</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a>  <span class="dt">Mempty</span><span class="ot"> ::</span> <span class="dt">FreeMonoid</span> t</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a>  <span class="dt">Embed0</span><span class="ot"> ::</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t</span></code></pre></div>
+<p>However the above ignores the associativity law of monoids. For one, it is possible to distinguish objects on the basis of the association structure of <code>Mappend</code>. One way to take into account associativity is to force one particular association. For example, we can force associating on the right. To take care of the unit law, we also won’t allow <code>Mempty</code> on the left of <code>Mappend</code>. Thus, the only thing that we can do on the left of <code>Mempty</code> is embed. We obtain:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonoid</span> t <span class="kw">where</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>  <span class="dt">Mappend</span><span class="ot"> ::</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>  <span class="dt">Mempty</span><span class="ot"> ::</span> <span class="dt">FreeMonoid</span> t</span></code></pre></div>
+<p>This is simply the list type. While it is indeed a free monoid, it has some problems, such as an expensive append. To address this, one could choose to use the first representation, and simply make sure that no program makes observable identified objects; for example by making the type private and having an interpretation function <code>fold</code> which does not expose the structure.</p>
+<h2 id="final-encoding">Final encoding</h2>
+<p>Another useful representation of free structures is the so called “final” one. Essentially, it is a church-encoded version of the “initial” encoding. Let’s review quickly Church encodings. If a data type can be written as the fixpoint of some functor <code>f</code>:</p>
+<div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">Fix</span> f <span class="ot">=</span> <span class="dt">In</span> (f (<span class="dt">Fix</span> f))</span></code></pre></div>
+<p>then its Church encoding is as follows:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a><span class="kw">type</span> <span class="dt">Church</span> f <span class="ot">=</span> <span class="ot">∀</span>α<span class="op">.</span> (f α <span class="ot">→</span> α) <span class="ot">→</span> α</span></code></pre></div>
+<p>For our first version of the free monoid, the functor in question is (exercise):</p>
+<pre class="example"><code>F t α = (α × α) + α + t
+</code></pre>
+<p>We an now compute <code>Church F</code> by distributing the sum over the function type, using the isomorphism <code>(a + b) → c = (a → c) × (b → c)</code>:</p>
+<pre class="example"><code>Church F = (((α × α) + α + t) → α) → α
+         = (((α × α) → α) × (α → α) × (t → α)) → α
+</code></pre>
+<p>We have here a tuple with three components. The first two components are the types of mappend and mempty, and the last one corresponds to the embedding function. Therefore, if we wish, we can substitute the first two components by a constraint that α has a monoid structure.</p>
+<pre class="example"><code>Church F = (Monoid α × (t → α)) → α
+</code></pre>
+<p>Going back to Haskell:</p>
+<div class="sourceCode" id="cb9"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true"></a><span class="kw">newtype</span> <span class="dt">FreeMonoidFinal</span> t <span class="ot">=</span> <span class="dt">MF</span> (<span class="kw">forall</span> a<span class="op">.</span> <span class="dt">Monoid</span> a <span class="ot">=&gt;</span> (t <span class="ot">→</span> a) <span class="ot">→</span> a)</span></code></pre></div>
+<p>One advantage of this formulation is that we do not have to worry about laws any more. Rather, we pass the buck to the <code>Monoid a</code> instance. If it satisfies the laws, then our encoding will automatically satisfy them as well. Consequently, we can even generalise the above to any free structure, thanks to the support of GHC for abstracting over constraints:</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true"></a><span class="kw">newtype</span> <span class="dt">Free0</span> k t <span class="ot">=</span> <span class="dt">Free0</span> (<span class="kw">forall</span> a<span class="op">.</span> k a <span class="ot">=&gt;</span> (t <span class="ot">→</span> a) <span class="ot">→</span> a)</span></code></pre></div>
+<p>Before closing this section, let’s make sure we did not delude ourselves by providing the appropriate instances:</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Semigroup</span> (<span class="dt">Free0</span> <span class="dt">Monoid</span> t) <span class="kw">where</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true"></a>  (<span class="dt">MF</span> f) <span class="op">&lt;&gt;</span> (<span class="dt">MF</span> g) <span class="ot">=</span> <span class="dt">MF</span> (\embed <span class="ot">-&gt;</span> f embed <span class="op">&lt;&gt;</span> g embed)</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Monoid</span> (<span class="dt">Free0</span> <span class="dt">Monoid</span> t) <span class="kw">where</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true"></a>  <span class="fu">mempty</span> <span class="ot">=</span> <span class="dt">MF</span> (\_ <span class="ot">-&gt;</span> <span class="fu">mempty</span>)</span></code></pre></div>
+<h1 id="free-monad">Free Monad</h1>
+<h2 id="initial-encoding-1">Initial encoding</h2>
+<p>We can now repeat the same steps for monad instead of monoid.</p>
+<p>The naive initial encoding is as follows:</p>
+<div class="sourceCode" id="cb12"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonadInitial</span> t a <span class="kw">where</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true"></a>  <span class="dt">Embed1</span><span class="ot"> ::</span> t a <span class="ot">-&gt;</span> <span class="dt">FreeMonadInitial</span> t a</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true"></a>  <span class="dt">Return</span><span class="ot"> ::</span> a <span class="ot">-&gt;</span> <span class="dt">FreeMonadInitial</span> t a</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true"></a>  <span class="dt">Bind</span><span class="ot"> ::</span> <span class="dt">FreeMonadInitial</span> t a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">FreeMonadInitial</span> t b) <span class="ot">-&gt;</span> <span class="dt">FreeMonadInitial</span> t b</span></code></pre></div>
+<p>The right-associated one looks like this (on the left of bind we allow only to embed):</p>
+<div class="sourceCode" id="cb13"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonad'</span> t a <span class="kw">where</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true"></a>  <span class="dt">Return'</span><span class="ot"> ::</span> a <span class="ot">-&gt;</span> <span class="dt">FreeMonad'</span> t a</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true"></a>  <span class="dt">BindEmbed</span><span class="ot"> ::</span> t a <span class="ot">-&gt;</span> (a <span class="ot">-&gt;</span> <span class="dt">FreeMonad'</span> t b) <span class="ot">-&gt;</span> <span class="dt">FreeMonad'</span> t b</span></code></pre></div>
+<p>The above version is derived by Kiselyov and Iishi in “Freer Monads, More Extensible Effects”, in a different way than mine.</p>
+<p>Instead of a presentation based on <code>bind</code>, there is another presentation of monads, based on <code>join : m (m a) → m a</code>. As far as I know this is the leading presentation in category theory. It makes in particular more plain that a monad is a monoid (join is like mappend) in the suitable category (endofunctors).</p>
+<p>If we are to construct our free structure using <code>join</code> instead of <code>bind</code>, then we find this definition:</p>
+<div class="sourceCode" id="cb14"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonad''</span> t a <span class="kw">where</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true"></a>  <span class="dt">Embed</span><span class="ot"> ::</span> t a <span class="ot">-&gt;</span> <span class="dt">FreeMonad''</span> t a</span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true"></a>  <span class="dt">Join</span><span class="ot"> ::</span> <span class="dt">FreeMonad''</span> t (<span class="dt">FreeMonad''</span> t a) <span class="ot">-&gt;</span> <span class="dt">FreeMonad''</span> t a</span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true"></a>  <span class="dt">Pure</span><span class="ot"> ::</span> a <span class="ot">-&gt;</span> <span class="dt">FreeMonad''</span> t a</span></code></pre></div>
+<p>The above version also ignores the laws. But as before, we can repair this issue by changing the <code>Join</code> constructor, so that it refers to <code>t</code> directly instead of <code>FreeMonad'' t</code> in the left (of the functor composition):</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true"></a><span class="kw">data</span> <span class="dt">FreeMonad''</span> t a <span class="kw">where</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true"></a>  <span class="dt">JoinEmbed</span><span class="ot"> ::</span> t (<span class="dt">FreeMonad''</span> t a) <span class="ot">-&gt;</span> <span class="dt">FreeMonad''</span> t a</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true"></a>  <span class="dt">Pure</span><span class="ot"> ::</span> a <span class="ot">-&gt;</span> <span class="dt">FreeMonad''</span> t a</span></code></pre></div>
+<p>This is the version proposed by Kmett in one of his library and has been the basis of many applications.</p>
+<h2 id="final-encoding-1">Final encoding</h2>
+<p>To construct the final representation of a free monad, let’s instead adapt the generic free structure of arity 0, to arity 1. Essentially, it suffices to add type parameters where they are necessary. (One trap is that there must be inner quantification.)</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true"></a><span class="kw">newtype</span> <span class="dt">Free1</span> k t x <span class="ot">=</span> <span class="dt">Free1</span> (<span class="kw">forall</span> a<span class="op">.</span> k a <span class="ot">=&gt;</span> (<span class="kw">forall</span> x<span class="op">.</span> t x <span class="ot">→</span> a x) <span class="ot">→</span> a x)</span></code></pre></div>
+<p>Just to make sure, let’s check we made no mistake by defining the monad instance for <code>Free1 Monad t</code></p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Functor</span> (<span class="dt">Free1</span> <span class="dt">Monad</span> t) <span class="kw">where</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true"></a>  <span class="fu">fmap</span> f (<span class="dt">Free1</span> x)  <span class="ot">=</span> <span class="dt">Free1</span> (\embed <span class="ot">-&gt;</span> <span class="fu">fmap</span> f (x embed))</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true"></a></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Applicative</span> (<span class="dt">Free1</span> <span class="dt">Monad</span> t) <span class="kw">where</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true"></a>  <span class="fu">pure</span> x <span class="ot">=</span> <span class="dt">Free1</span> (\embed <span class="ot">-&gt;</span> <span class="fu">pure</span> x)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true"></a>  <span class="dt">Free1</span> f <span class="op">&lt;*&gt;</span> <span class="dt">Free1</span> g <span class="ot">=</span> <span class="dt">Free1</span> (\embed <span class="ot">-&gt;</span> f embed <span class="op">&lt;*&gt;</span> g embed)</span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true"></a></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true"></a><span class="kw">instance</span> <span class="dt">Monad</span> (<span class="dt">Free1</span> <span class="dt">Monad</span> t) <span class="kw">where</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true"></a>  <span class="dt">Free1</span> a <span class="op">&gt;&gt;=</span> f <span class="ot">=</span> <span class="dt">Free1</span> <span class="op">$</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true"></a>    \embed <span class="ot">-&gt;</span> <span class="kw">do</span> x <span class="ot">&lt;-</span> a embed</span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true"></a>                 <span class="kw">let</span> <span class="dt">Free1</span> b <span class="ot">=</span> f x</span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true"></a>                 b embed</span></code></pre></div>
+<p>(All these instances can be defined in a completely systematic way. Perhaps an idea for a future GHC extension?)</p>
+<h1 id="free-anything">Free anything</h1>
+<p>We above final encoding is easy to generalise to any arity. Here it is for 2:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true"></a><span class="kw">newtype</span> <span class="dt">Free2</span> k t x y <span class="ot">=</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true"></a>   <span class="dt">Free2</span> (<span class="kw">forall</span> a<span class="op">.</span> k a <span class="ot">=&gt;</span> (<span class="kw">forall</span> x y<span class="op">.</span> t x y <span class="ot">→</span> a x y) <span class="ot">→</span> a x y)</span></code></pre></div>
+<p>This way we can have <code>Free2 Category</code>, <code>Free2 Arrow</code>, etc.</p>
+<p>As an exercise, can you find applications for those? What about <code>Free0
+Ring</code> or <code>Free1 Traversable</code>?</p>
+
+        </div>
+        <div id="footer">
+            Site generated by
+            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+        </div>
+    </body>
+</html>
