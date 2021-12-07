@@ -7,8 +7,16 @@
         <description><![CDATA[This feed provides JP's latests posts]]></description>
         <atom:link href="https://jyp.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Sun, 08 Mar 2020 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Sun, 16 Jan 2022 00:00:00 UT</lastBuildDate>
         <item>
+    <title>Another Keyboard, Yet Again</title>
+    <link>https://jyp.github.io/posts/yakV2.html</link>
+    <description><![CDATA[This is the post description]]></description>
+    <pubDate>Sun, 16 Jan 2022 00:00:00 UT</pubDate>
+    <guid>https://jyp.github.io/posts/yakV2.html</guid>
+    <dc:creator>Jean-Philippe Bernardy</dc:creator>
+</item>
+<item>
     <title>Initial And Final Free Structures</title>
     <link>https://jyp.github.io/posts/free-structures.html</link>
     <description><![CDATA[This is the post description]]></description>
