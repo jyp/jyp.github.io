@@ -94,7 +94,7 @@ export NIX_GHC=&quot;$HOME/.nix-profile/bin/ghc&quot;
 export NIX_GHCPKG=&quot;$HOME/.nix-profile/bin/ghc-pkg&quot;
 export NIX_GHC_DOCDIR=&quot;$HOME/.nix-profile/share/doc/ghc/html&quot;
 export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;</code></pre>
-<p>Why the need for this? In the works of Peter Simons: "The problem with that [<code>ghc-paths</code>] is fundamentally based on the assumption that there is <em>one</em> GHC and all libraries are installed into its lib directory – an assumption Nix doesn’t fulfill. We try to remedy that issue by patching <code>ghc-paths</code> so that it returns the contents of those environment variables above instead of hard-coded (incorrect) values.</p>
+<p>Why the need for this? In the works of Peter Simons: “The problem with that [<code>ghc-paths</code>] is fundamentally based on the assumption that there is <em>one</em> GHC and all libraries are installed into its lib directory – an assumption Nix doesn’t fulfill. We try to remedy that issue by patching <code>ghc-paths</code> so that it returns the contents of those environment variables above instead of hard-coded (incorrect) values.</p>
 <h2 id="upgrading">Upgrading</h2>
 <p>Eventually you’ll want to upgrade your stuff. If this is the first time you read this HOWTO, skip this section.</p>
 <p>Optionally, start by cleaning the old versions that you have installed.</p>
