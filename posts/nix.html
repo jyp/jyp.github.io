@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>The Spume of Years  - HOWTO --- Nix for Haskell Development</title>
-        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
-        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
-        
-        <link rel="stylesheet" type="text/css" href="../css/home.css" />
-        
-    </head>
-    <body>
-        <div id="header">
-            <div id="logo">
-                <a href="../">Not JP's Blog</a>
-            </div>
-            <div id="navigation">
-                <a href="../">Home</a>
-                <a href="../about.html">About</a>
-                <a href="../contact.html">Contact</a>
-                <a href="../recent.html">Recent</a>
-            </div>
-        </div>
-
-        <div id="content">
-            <h1>HOWTO --- Nix for Haskell Development</h1>
-
-            <div class="info">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Blog title  - HOWTO --- Nix for Haskell Development</title>
+    <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    
+    <link rel="stylesheet" type="text/css" href="../css/home.css" />
+    
+  </head>
+  <body>
+    <div id="header">
+      <div id="logo">
+        <a href="../">Blog title</a>
+      </div>
+      <div id="navigation">
+        <a href="../">Home</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../recent.html">Recent</a>
+      </div>
+    </div>
+    
+    <div id="content">
+      <h1>HOWTO --- Nix for Haskell Development</h1>
+      <div class="info">
     Last updated on June 15, 2015
     
         by Jean-Philippe Bernardy
@@ -38,15 +37,22 @@
     
 </div>
 
-<p><em>Update: you should probably read the <a href="http://nixos.org/nixpkgs/manual/#users-guide-to-the-haskell-infrastructure">relevant section of the nixpkgs manual</a> instead of this. My tool, <a href="styx.html">Styx</a>, may also be of interest.</em></p>
-<p>“Nix” is often touted as the best solution to solving the so called “cabal hell”. This note is a HOWTO on using nix for Haskell development.</p>
+<p><em>Update: you should probably read the
+<a href="http://nixos.org/nixpkgs/manual/#users-guide-to-the-haskell-infrastructure">relevant section of the nixpkgs manual</a>
+instead of this. My tool, <a href="styx.html">Styx</a>, may also be of
+interest.</em></p>
+<p>“Nix” is often touted as the best solution to solving the so called
+“cabal hell”. This note is a HOWTO on using nix for Haskell
+development.</p>
 <h1 id="blank-state">Blank state</h1>
-<p>Before starting with nix, I recommend removing any existing package database to avoid potential noise pollution.</p>
+<p>Before starting with nix, I recommend removing any existing package
+database to avoid potential noise pollution.</p>
 <p>Nuke your local package database:</p>
 <pre><code>rm -r ~/.ghc/</code></pre>
 <p>Nuke your cabal sandboxes:</p>
 <pre><code>cabal sandbox delete</code></pre>
-<p>Before moving on to the next stages, take a moment to enjoy the feeling of Zen.</p>
+<p>Before moving on to the next stages, take a moment to enjoy the feeling
+of Zen.</p>
 <h1 id="nix-what">Nix what?</h1>
 <p>A word of warning. Nix may refer to any of these (related) projects:</p>
 <ul>
@@ -54,20 +60,37 @@
 <li>the nixpkgs set of packages (described using the nix language)</li>
 <li>the NixOS linux distribution</li>
 </ul>
-<p>This HOWTO is about leveraging nix and nixpkgs; I will not cover NixOS, and assume that NixOS is not installed.</p>
+<p>This HOWTO is about leveraging nix and nixpkgs; I will not cover
+NixOS, and assume that NixOS is not installed.</p>
 <h1 id="installing-nix">Installing nix</h1>
 <p>Assuming you’re on a single user system, you can</p>
 <pre><code>curl https://nixos.org/nix/install | sh</code></pre>
-<p>This modifies your <code>.profile</code>, so logout/login is advised. After this you’ll get the standard nix commands in your path. Your system will be setup to fetch the packages available in nixpkgs.</p>
-<p>(You may want not to run shell scripts as you download them from the internet. In this case lookup https://nixos.org/nix/download.html and do a proper installation as you please.)</p>
-<p>Any tedious work will be taken care of by the <code>cabal2nix</code> tool. Install it now using nix:</p>
+<p>This modifies your <code>.profile</code>, so logout/login is advised. After this
+you’ll get the standard nix commands in your path. Your system will be
+setup to fetch the packages available in nixpkgs.</p>
+<p>(You may want not to run shell scripts as you download them from the
+internet. In this case lookup https://nixos.org/nix/download.html and
+do a proper installation as you please.)</p>
+<p>Any tedious work will be taken care of by the <code>cabal2nix</code>
+tool. Install it now using nix:</p>
 <pre><code>nix-env -iA nixpkgs.haskellPackages.cabal2nix</code></pre>
 <p>The options for the above command are:</p>
 <p><code>-i</code>: to mean “install”</p>
-<p><code>-A</code>: to mean “attribute”. Long story short, this means to refer to the package by the name of the nix expression describing it rather than by the result of that expression. Note in particular that the name of the expression does not specify a version: we get the version that the nix team has currently selected for inclusion in nixpkgs.</p>
+<p><code>-A</code>: to mean “attribute”. Long story short, this means to refer to
+the package by the name of the nix expression describing it rather
+than by the result of that expression. Note in particular that the
+name of the expression does not specify a version: we get the
+version that the nix team has currently selected for inclusion in
+nixpkgs.</p>
 <h1 id="constructing-the-haskell-environment">Constructing the Haskell environment</h1>
-<p>We will begin by setting up a default environment for run-of-the-day Haskell hacking. If your projects are already neatly organized in repos, it is not necessary to go through these stages, as we will eventually build consistent environments from a configuration file which is stored in the repo of your project. Yet you should read this section as it will introduce concepts and commands needed later.</p>
-<p>You should define your Haskell environment by creating a <code>~/.nixpkgs/config.nix</code> with the following contents:</p>
+<p>We will begin by setting up a default environment for run-of-the-day
+Haskell hacking. If your projects are already neatly organized in
+repos, it is not necessary to go through these stages, as we will
+eventually build consistent environments from a configuration file
+which is stored in the repo of your project. Yet you should read this
+section as it will introduce concepts and commands needed later.</p>
+<p>You should define your Haskell environment by creating a
+<code>~/.nixpkgs/config.nix</code> with the following contents:</p>
 <pre><code>{
   packageOverrides = super: let self = super.pkgs; in
   {
@@ -81,25 +104,45 @@
 }</code></pre>
 <p>Then you can install this GHC environment by doing</p>
 <pre><code>nix-env -iA nixpkgs.myHaskellEnv</code></pre>
-<p>Most certainly, this will download a pre-compiled binary of GHC (of a recent version, as I write, version 7.10.1), produced by the Hydra build farm. While binaries are a nice time-saving convenience, working from sources is seamless, as we’ll see later.</p>
-<p>All of Hackage should be available in nixpkgs, but you can check the actual list of available packages by doing:</p>
+<p>Most certainly, this will download a pre-compiled binary of GHC (of a
+recent version, as I write, version 7.10.1), produced by the Hydra
+build farm. While binaries are a nice time-saving convenience, working
+from sources is seamless, as we’ll see later.</p>
+<p>All of Hackage should be available in nixpkgs, but you can check the
+actual list of available packages by doing:</p>
 <pre><code>nix-env -qaP -A nixpkgs.haskellPackages</code></pre>
-<p>In the above <code>-a</code> means “all” and <code>-P</code> means to print the attribute names as well. The <code>-A</code> attribute is necessary for haskell packages, as they are not visible by default (this choice baffles me too).</p>
-<p>Go ahead and install all the stuff you need. You should not suffer any problems with package dependencies, because the nixpkgs maintainers take care to offer a set of packages which are mutually compatible.</p>
-<p>As far as I understand, automatic builds of nixpkgs are performed. Build problems are reported to the nixpkgs maintainers, and so should be eventually fixed. So, using nixpkgs gives pretty good guarantees compared to plain cabal, even though issues might temporarily sneak in.</p>
+<p>In the above <code>-a</code> means “all” and <code>-P</code> means to print the attribute names
+as well. The <code>-A</code> attribute is necessary for haskell packages, as they
+are not visible by default (this choice baffles me too).</p>
+<p>Go ahead and install all the stuff you need. You should not suffer any
+problems with package dependencies, because the nixpkgs maintainers
+take care to offer a set of packages which are mutually compatible.</p>
+<p>As far as I understand, automatic builds of nixpkgs are
+performed. Build problems are reported to the nixpkgs maintainers, and
+so should be eventually fixed. So, using nixpkgs gives pretty good
+guarantees compared to plain cabal, even though issues might
+temporarily sneak in.</p>
 <h2 id="a-quirk">A quirk</h2>
-<p>In order to support the <code>ghc-paths</code> library (<code>ghc-mod</code> depends on it), you need to add the following variables to your environment:</p>
+<p>In order to support the <code>ghc-paths</code> library (<code>ghc-mod</code> depends on it),
+you need to add the following variables to your environment:</p>
 <pre><code>NIX_GHC_VERSION=$(ghc --numeric-version)
 export NIX_GHC=&quot;$HOME/.nix-profile/bin/ghc&quot;
 export NIX_GHCPKG=&quot;$HOME/.nix-profile/bin/ghc-pkg&quot;
 export NIX_GHC_DOCDIR=&quot;$HOME/.nix-profile/share/doc/ghc/html&quot;
 export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;</code></pre>
-<p>Why the need for this? In the works of Peter Simons: “The problem with that [<code>ghc-paths</code>] is fundamentally based on the assumption that there is <em>one</em> GHC and all libraries are installed into its lib directory – an assumption Nix doesn’t fulfill. We try to remedy that issue by patching <code>ghc-paths</code> so that it returns the contents of those environment variables above instead of hard-coded (incorrect) values.</p>
+<p>Why the need for this? In the works of Peter Simons: “The problem
+with that [<code>ghc-paths</code>] is fundamentally based on the assumption that
+there is <em>one</em> GHC and all libraries are installed into its lib
+directory – an assumption Nix doesn’t fulfill. We try to remedy that
+issue by patching <code>ghc-paths</code> so that it returns the contents of those
+environment variables above instead of hard-coded (incorrect) values.</p>
 <h2 id="upgrading">Upgrading</h2>
-<p>Eventually you’ll want to upgrade your stuff. If this is the first time you read this HOWTO, skip this section.</p>
+<p>Eventually you’ll want to upgrade your stuff. If this is the first
+time you read this HOWTO, skip this section.</p>
 <p>Optionally, start by cleaning the old versions that you have installed.</p>
 <pre><code>nix-collect-garbage -d</code></pre>
-<p>(This will keep the current version; and I’ll let you lookup what <code>-d</code> does)</p>
+<p>(This will keep the current version; and I’ll let you lookup what <code>-d</code>
+does)</p>
 <p>You can then upgrade the list of packages by doing:</p>
 <pre><code>nix-channel --update</code></pre>
 <p>And do an actual upgrade like so:</p>
@@ -108,26 +151,40 @@ export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;<
 <pre><code>nix-channel --rollback</code></pre>
 <p>(but I’ve never tried it).</p>
 <h1 id="living-on-the-bleeding-edge">Living on the bleeding edge</h1>
-<p>Even though nixpkgs has all of Hackage, you may need the version of a package not yet pushed to Hackage (for example a fork). This can be done on your user account, without having to touch the system-wide configuration, let alone the central nixpkgs repo.</p>
-<p>We will store the package descriptions in <code>~/.nixpkgs/local</code> (but you can choose any location you like):</p>
+<p>Even though nixpkgs has all of Hackage, you may need the version of a
+package not yet pushed to Hackage (for example a fork). This can be
+done on your user account, without having to touch the system-wide
+configuration, let alone the central nixpkgs repo.</p>
+<p>We will store the package descriptions in <code>~/.nixpkgs/local</code> (but you
+can choose any location you like):</p>
 <pre><code>mkdir -p ~/.nixpkgs/local</code></pre>
 <p>First you’ll need some VCS (git) support:</p>
 <pre><code>nix-env -i nix-prefetch-scripts</code></pre>
-<p>Let us suppose we want to install the latest (HEAD) of the pretty-compact package:</p>
+<p>Let us suppose we want to install the latest (HEAD) of the
+pretty-compact package:</p>
 <pre><code>cabal2nix git@github.com:jyp/prettiest.git &gt; pretty-compact.nix</code></pre>
 <p>While we’re at it, check the cabal2nix options:</p>
 <pre><code>cabal2nix -h</code></pre>
-<p>In particular, the following options can come in handy if the package is in a slightly broken state. So read their documentation carefully.</p>
+<p>In particular, the following options can come in handy if the package
+is in a slightly broken state. So read their documentation carefully.</p>
 <pre><code>--jailbreak
 --no-check
 --no-haddock</code></pre>
-<p>The <code>pretty-compact.nix</code> file then contains all the info needed to build the package. We should strive not to edit this file, as we may need to regenerate it later. Note that the above command creates a nix file referring to the current commit of the master branch of the repo. When the repo is usefully updated, you’ll need to re-run the command. If you want, save the cabal2nix command to remember the options you used.</p>
+<p>The <code>pretty-compact.nix</code> file then contains all the info needed to
+build the package. We should strive not to edit this file, as we may
+need to regenerate it later. Note that the above command creates a
+nix file referring to the current commit of the master branch of the
+repo. When the repo is usefully updated, you’ll need to re-run the
+command. If you want, save the cabal2nix command to remember the
+options you used.</p>
 <pre><code>echo 'cabal2nix cabal://pretty-compact-1.0 &gt; pretty-compact.nix' &gt;&gt; c2n-regen.sh</code></pre>
 <h2 id="other-sources">Other sources</h2>
-<p>You may want to use a local tree as the source for the package. To do so, invoke cabal2nix with its root instead of the cabal url:</p>
+<p>You may want to use a local tree as the source for the package. To do so,
+invoke cabal2nix with its root instead of the cabal url:</p>
 <pre><code>cabal2nix ~/repo/prettiest &gt; pretty-compact.nix</code></pre>
 <h1 id="linking-packages-into-your-set-of-package-descriptions">Linking packages into your set of package descriptions</h1>
-<p>We can now proceed to add the package to the user-local set of packages. To do so, override the <code>haskellPackages</code> field in nixpkgs, as follows:</p>
+<p>We can now proceed to add the package to the user-local set of packages.
+To do so, override the <code>haskellPackages</code> field in nixpkgs, as follows:</p>
 <pre><code>{
   packageOverrides = super: let self = super.pkgs; in
   {
@@ -146,13 +203,18 @@ export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;<
   };
 }</code></pre>
 <h1 id="per-project-configuration">Per-project configuration</h1>
-<p>The configuration in <code>~/.nixpkgs</code> is, obviously, a per-user one. Yet, it is not difficult to create per-project environments, which can be shared with collaborators, via the project repo.</p>
+<p>The configuration in <code>~/.nixpkgs</code> is, obviously, a per-user one. Yet,
+it is not difficult to create per-project environments, which can be
+shared with collaborators, via the project repo.</p>
 <p>To create such a per-project environment:</p>
 <ol type="1">
-<li><p>Create a nix file for your project. The following commands will do it by picking the data that you have in the cabal file:</p>
+<li><p>Create a nix file for your project. The following commands will do
+it by picking the data that you have in the cabal file:</p>
 <pre><code> cd my/repo/project
  cabal2nix . &gt; default.nix</code></pre></li>
-<li><p>Create the package descriptions of the packages you depend on, using <code>cabal2nix</code>, as described above. In this example I assume that they reside in the <code>nix</code> subdirectory of your repo.</p></li>
+<li><p>Create the package descriptions of the packages you depend on,
+using <code>cabal2nix</code>, as described above. In this example I assume
+that they reside in the <code>nix</code> subdirectory of your repo.</p></li>
 <li><p>Create a <code>shell.nix</code> file with the following contents:</p></li>
 </ol>
 <pre><code>let pkgs = (import &lt;nixpkgs&gt; {});
@@ -164,10 +226,17 @@ export NIX_GHC_LIBDIR=&quot;$HOME/.nix-profile/lib/ghc-${NIX_GHC_VERSION}&quot;<
         };
        });
 in haskellPackages.thisPackage.env</code></pre>
-<p>Assuming a fixed version of nixpkgs, the above describes a reproducible build environment. (One could also fix the version of nixpkgs. I leave this as an exercise to the reader. Yet, tracking the nixpkgs is not necessarily a bad idea, as you may want to eventually push your package to nixpkgs.)</p>
+<p>Assuming a fixed version of nixpkgs, the above describes a
+reproducible build environment. (One could also fix the version of
+nixpkgs. I leave this as an exercise to the reader. Yet, tracking
+the nixpkgs is not necessarily a bad idea, as you may want to
+eventually push your package to nixpkgs.)</p>
 <p>You can then use the above to build your package. Type:</p>
 <pre><code> nix-shell --pure</code></pre>
-<p>This opens a shell which provides the build environment described above. It also removes from the environment whatever is not explicitly required, thanks to the <code>--pure</code> option. (By default, nix-shell picks <code>shell.nix</code> from the current directory) Proceed to build the project:</p>
+<p>This opens a shell which provides the build environment described
+above. It also removes from the environment whatever is not explicitly
+required, thanks to the <code>--pure</code> option. (By default, nix-shell picks
+<code>shell.nix</code> from the current directory) Proceed to build the project:</p>
 <pre><code> cabal configure
  cabal build</code></pre>
 <p>(When you’re done, exit the shell to restore your default environment)</p>
@@ -176,14 +245,21 @@ in haskellPackages.thisPackage.env</code></pre>
 <pre><code> nix-shell --pure --command &quot;...&quot;</code></pre>
 <p>I personally have a <code>nix-ghc</code> script with the following contents:</p>
 <pre><code>nix-shell --pure --command &quot;ghc $*&quot;</code></pre>
-<p>The above is useful for running ghc directly in the nix-shell from your favourite environment. Because I use emacs and flycheck, I have configured flycheck to use the local nix-env by adding a <code>.dir-locals.el</code> file with the following contents:</p>
+<p>The above is useful for running ghc directly in the nix-shell from
+your favourite environment. Because I use emacs and flycheck, I have
+configured flycheck to use the local nix-env by adding a
+<code>.dir-locals.el</code> file with the following contents:</p>
 <pre><code>((haskell-mode . ((flycheck-haskell-ghc-executable . &quot;nix-ghc&quot;))))</code></pre>
 <h1 id="nix-is-not-for-me-after-all">Nix is not for me after all</h1>
-<p>If you decide that Nix is not the right solution for you after all, it’s easy to get rid of it. Just type:</p>
+<p>If you decide that Nix is not the right solution for you after all,
+it’s easy to get rid of it. Just type:</p>
 <pre><code> rm -rf /nix</code></pre>
-<p>and take a moment to enjoy the feeling of Zen before continuing your search for a less painful cabal.</p>
+<p>and take a moment to enjoy the feeling of Zen before continuing your
+search for a less painful cabal.</p>
 <h1 id="references">References</h1>
-<p>This HOWTO is compiled from various sources, including the NixOS wiki and various blog posts, reddit comments, e-mails, etc. The following is just the initial set of references that I used. (Most recent ones last.)</p>
+<p>This HOWTO is compiled from various sources, including the NixOS wiki
+and various blog posts, reddit comments, e-mails, etc. The following
+is just the initial set of references that I used. (Most recent ones last.)</p>
 <ul>
 <li>[1] https://ocharles.org.uk/blog/posts/2014-02-04-how-i-develop-with-nixos.html</li>
 <li>[2] http://www.pavelkogan.com/2014/07/09/haskell-development-with-nix/</li>
@@ -191,19 +267,23 @@ in haskellPackages.thisPackage.env</code></pre>
 <li>[4] https://www.youtube.com/watch?t=12&amp;v=BsBhi_r-OeE</li>
 <li>[4] Conquer Cabal Hell With Nix https://www.youtube.com/watch?v=mQd3s57n_2Y</li>
 </ul>
-<p>Note in particular that there are other recipes for the nixconfig file [1,2]. Mine allows both:</p>
+<p>Note in particular that there are other recipes for the nixconfig file
+[1,2]. Mine allows both:</p>
 <ul>
 <li><p>to have dependencies between you local packages</p></li>
-<li><p>to override existing packages. (so you can bring in another version of, say, “lens” than the one on nixpkgs) Be wary that if you bring another version of a fundamental package (say “random”) much stuff will have to be recompiled locally.</p></li>
+<li><p>to override existing packages. (so you can bring in another
+version of, say, “lens” than the one on nixpkgs) Be wary that if
+you bring another version of a fundamental package (say “random”)
+much stuff will have to be recompiled locally.</p></li>
 </ul>
 <!--  LocalWords:  HOWTO ghc NixOS logout login nixpkgs repo
       LocalWords:  pre config subdirectory emacs reddit 
  -->
 
-        </div>
-        <div id="footer">
-            Site generated by
-            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
-        </div>
-    </body>
+    </div>
+    <div id="footer">
+      Site generated by
+      <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+    </div>
+  </body>
 </html>

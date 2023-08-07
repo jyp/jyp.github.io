@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>The Spume of Years  - Why linear types matter.</title>
-        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
-        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
-        
-        <link rel="stylesheet" type="text/css" href="../css/home.css" />
-        
-    </head>
-    <body>
-        <div id="header">
-            <div id="logo">
-                <a href="../">Not JP's Blog</a>
-            </div>
-            <div id="navigation">
-                <a href="../">Home</a>
-                <a href="../about.html">About</a>
-                <a href="../contact.html">Contact</a>
-                <a href="../recent.html">Recent</a>
-            </div>
-        </div>
-
-        <div id="content">
-            <h1>Why linear types matter.</h1>
-
-            <div class="info">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Blog title  - Why linear types matter.</title>
+    <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    
+    <link rel="stylesheet" type="text/css" href="../css/home.css" />
+    
+  </head>
+  <body>
+    <div id="header">
+      <div id="logo">
+        <a href="../">Blog title</a>
+      </div>
+      <div id="navigation">
+        <a href="../">Home</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../recent.html">Recent</a>
+      </div>
+    </div>
+    
+    <div id="content">
+      <h1>Why linear types matter.</h1>
+      <div class="info">
     Last updated on March 15, 2017
     
 </div>
@@ -36,49 +35,154 @@
     
 </div>
 
-<p>There are a million reason why linear types matter, and I’m not going to discuss them all here. I’m only going going to look at the argument that Hughes makes in is famous paper “why functional programming matters” and see how it adapts to the special case of <strong>linearly-typed</strong> functional programming. Hence the spoof title.</p>
-<p>In my view, the principal of a type system with linearity is that it features a linear function type, written <span class="math inline"><em>A</em> ⊸ <em>B</em></span>, alongside the usual arrow type <span class="math inline"><em>A</em> → <em>B</em></span>. A linear function is guaranteed to use its argument just once (not zero time, nor twice or more).</p>
-<p>As always with type-systems, the disbelivers ask: how can it be that, by <strong>preventing</strong> something, we get a more useful programming language? We got the exact same question about purely functional programming: “how can functional programming be so useful if all it does is prevent to update values?” In his paper, Hughes argues this way: it is not what functional programming prevents that matters, but what it enables. The argument goes like this:</p>
+<p>There are a million reason why linear types matter, and I’m not going
+to discuss them all here. I’m only going going to look at the argument
+that Hughes makes in is famous paper “why functional programming
+matters” and see how it adapts to the special case of <strong>linearly-typed</strong>
+functional programming. Hence the spoof title.</p>
+<p>In my view, the principal of a type system with linearity is that it
+features a linear function type, written <span class="math inline"><em>A</em> ⊸ <em>B</em></span>, alongside the usual
+arrow type <span class="math inline"><em>A</em> → <em>B</em></span>. A linear function is guaranteed to use its
+argument just once (not zero time, nor twice or more).</p>
+<p>As always with type-systems, the disbelivers ask: how can it be that,
+by <strong>preventing</strong> something, we get a more useful programming language?
+We got the exact same question about purely functional programming:
+“how can functional programming be so useful if all it does is prevent
+to update values?” In his paper, Hughes argues this way: it is not
+what functional programming prevents that matters, but what it
+enables. The argument goes like this:</p>
 <blockquote>
-<p>When writing a modular program to solve a problem, one first divides the problem into subproblems, then solves the sub-problems and combines the solutions. The ways in which one can divide up the original problem depend directly on the ways in which one can glue solutions together. Therefore, to increase ones ability to modularise a problem conceptually, one must provide new kinds of glue in the programming language.</p>
-<p>One can appreciate the importance of glue by an analogy with carpentry. A chair can be made quite easily by making the parts – seat, legs, back etc. – and sticking them together in the right way. But this depends on an ability to make joints and wood glue. Lacking that ability, the only way to make a chair is to carve it in one piece out of a solid block of wood, a much harder task. This example demonstrates both the enormous power of modularisation and the importance of having the right glue.</p>
-<p>Now let us return to functional programming. We shall argue […] that functional languages provide two new, very important kinds of glue. We shall give many examples of programs that can be modularised in new ways, and thereby greatly simplified. This is the key to functional programming’s power – it allows greatly improved modularisation. It is also the goal for which functional programmers must strive – smaller and simpler and more general modules, glued together with the new glues we shall describe.</p>
+<p>When writing a modular program to solve a problem, one first divides
+the problem into subproblems, then solves the sub-problems and
+combines the solutions. The ways in which one can divide up the
+original problem depend directly on the ways in which one can glue
+solutions together. Therefore, to increase ones ability to modularise
+a problem conceptually, one must provide new kinds of glue in the
+programming language.</p>
+<p>One can appreciate the importance of glue by an analogy with
+carpentry. A chair can be made quite easily by making the parts –
+seat, legs, back etc. – and sticking them together in the right
+way. But this depends on an ability to make joints and wood
+glue. Lacking that ability, the only way to make a chair is to carve
+it in one piece out of a solid block of wood, a much harder task. This
+example demonstrates both the enormous power of modularisation and the
+importance of having the right glue.</p>
+<p>Now let us return to functional programming. We shall argue […] that
+functional languages provide two new, very important kinds of glue. We
+shall give many examples of programs that can be modularised in new
+ways, and thereby greatly simplified. This is the key to functional
+programming’s power – it allows greatly improved modularisation. It is
+also the goal for which functional programmers must strive – smaller
+and simpler and more general modules, glued together with the new
+glues we shall describe.</p>
 </blockquote>
-<p>Following Hughes line of thought, I will argue here that linear types makes the functional programming much more dependable for resource-aware programming. So, what are the glues that FP provide?</p>
+<p>Following Hughes line of thought, I will argue here that linear types
+makes the functional programming much more dependable for
+resource-aware programming. So, what are the glues that FP provide?</p>
 <blockquote>
-<p>The other new kind of glue that functional languages provide enables whole programs to be glued together. Recall that a complete functional program is just a function from its input to its output. If <code>f</code> and <code>g</code> are such programs, then <code>(g . f)</code> is a program which, when applied to its <code>input</code>, computes</p>
+<p>The other new kind of glue that functional languages provide enables
+whole programs to be glued together. Recall that a complete functional
+program is just a function from its input to its output. If <code>f</code> and <code>g</code>
+are such programs, then <code>(g . f)</code> is a program which, when applied to
+its <code>input</code>, computes</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>g (f input)</span></code></pre></div>
-<p>The program <code>f</code> computes its output which is used as the input to program <code>g</code>. This might be implemented conventionally by storing the output from <code>f</code> in a temporary file. The problem with this is that the temporary file might occupy so much memory that it is impractical to glue the programs together in this way. Functional languages provide a solution to this problem. The two programs <code>f</code> and <code>g</code> are run together in strict synchronisation. <code>f</code> is only started once <code>g</code> tries to read some input, and only runs for long enough to deliver the output <code>g</code> is trying to read. Then <code>f</code> is suspended and <code>g</code> is run until it tries to read another input. As an added bonus, if <code>g</code> terminates without reading all of <code>f</code> ’s output then <code>f</code> is aborted. <code>f</code> can even be a non-terminating program, producing an infinite amount of output, since it will be terminated forcibly as soon as <code>g</code> is finished. This allows termination conditions to be separated from loop bodies – a powerful modularisation.</p>
-<p>Since this method of evaluation runs <code>f</code> as little as possible, it is called “lazy evaluation”. It makes it practical to modularise a program as a generator which constructs a large number of possible answers, and a selector which chooses the appropriate one. While some other systems allow programs to be run together in this manner, only functional languages use lazy evaluation uniformly for every function call, allowing any part of a program to be modularised in this way. Lazy evaluation is perhaps the most powerful tool for modularisation in the functional programmer’s repertoire.</p>
+<p>The program <code>f</code> computes its output which is used as the input to
+program <code>g</code>. This might be implemented conventionally by storing the
+output from <code>f</code> in a temporary file. The problem with this is that the
+temporary file might occupy so much memory that it is impractical to
+glue the programs together in this way. Functional languages provide
+a solution to this problem. The two programs <code>f</code> and <code>g</code> are run
+together in strict synchronisation. <code>f</code> is only started once <code>g</code> tries
+to read some input, and only runs for long enough to deliver the
+output <code>g</code> is trying to read. Then <code>f</code> is suspended and <code>g</code> is run
+until it tries to read another input. As an added bonus, if <code>g</code>
+terminates without reading all of <code>f</code> ’s output then <code>f</code> is
+aborted. <code>f</code> can even be a non-terminating program, producing an
+infinite amount of output, since it will be terminated forcibly as
+soon as <code>g</code> is finished. This allows termination conditions to be
+separated from loop bodies – a powerful modularisation.</p>
+<p>Since this method of evaluation runs <code>f</code> as little as possible, it is
+called “lazy evaluation”. It makes it practical to modularise a
+program as a generator which constructs a large number of possible
+answers, and a selector which chooses the appropriate one. While some
+other systems allow programs to be run together in this manner, only
+functional languages use lazy evaluation uniformly for every function
+call, allowing any part of a program to be modularised in this way.
+Lazy evaluation is perhaps the most powerful tool for modularisation
+in the functional programmer’s repertoire.</p>
 </blockquote>
-<p>In sum, lazy evaluation affords to construct complex programs by combining simple transformation functions. Indeed, whereas strict evaluation forces to fully reify each intermediate result between each computational step, lazy evaluation allows to run all the computations concurrently, often without ever allocating more than a single intermediate element at a time. Unfortunately, lazy evaluation suffers from two drawbacks.</p>
+<p>In sum, lazy evaluation affords to construct complex programs by
+combining simple transformation functions. Indeed, whereas strict
+evaluation forces to fully reify each intermediate result between each
+computational step, lazy evaluation allows to run all the computations
+concurrently, often without ever allocating more than a single
+intermediate element at a time.
+Unfortunately, lazy evaluation suffers from two drawbacks.</p>
 <h2 id="unpredicatble-memory-behavior">Unpredicatble memory behavior</h2>
-<p>First, it has unpredictable memory behavior. Consider again function composition <code>g . f</code>. One hopes that, at run-time, the intermediate list will only be allocated element-wise, as outlined above. Unfortunately, this desired behavior does not always happen. In fact it can only happen when the production pattern of <code>f</code> matches the consumption pattern of <code>g</code>. Otherwise, buffering occurs. In practice, this means that a seemingly innocuous change in either of the function definitions may drastically change the memory behavior of the composition, without warning.</p>
+<p>First, it has unpredictable memory behavior. Consider again function
+composition <code>g . f</code>. One hopes that, at run-time, the intermediate
+list will only be allocated element-wise, as outlined
+above. Unfortunately, this desired behavior does not always happen. In
+fact it can only happen when the production pattern of <code>f</code> matches the
+consumption pattern of <code>g</code>. Otherwise, buffering occurs. In practice,
+this means that a seemingly innocuous change in either of the function
+definitions may drastically change the memory behavior of the
+composition, without warning.</p>
 <p>Consider the expression <code>sum (enumerate 0 1000000)</code>.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>enumerate i n <span class="op">|</span> i <span class="op">&gt;</span> n <span class="ot">=</span> []</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>              <span class="op">|</span> <span class="fu">otherwise</span> <span class="ot">=</span> i<span class="op">:</span>enumerate (i<span class="op">+</span><span class="dv">1</span>) n</span></code></pre></div>
 <div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span> [] <span class="ot">=</span> <span class="dv">0</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span> (x<span class="op">:</span>xs) <span class="ot">=</span> x <span class="op">+</span> <span class="fu">sum</span> xs</span></code></pre></div>
-<p>If one cares about memory behavior, this means that the compositionality principle touted by Hughes breaks down.</p>
+<p>If one cares about memory behavior, this means that the
+compositionality principle touted by Hughes breaks down.</p>
 <h2 id="incompatibility-with-effects">Incompatibility with effects</h2>
-<p>Second, lazy evaluation does not extend nicely to effectful processing. That is, if (say) an input list is produced by reading a file lazily, one is exposed to losing referential transparency (as <span class="citation" data-cites="kiselyov_lazy_2013"></span> has shown). For example, one may rightfully expect<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that both following programs have the same behavior:</p>
-<p>&lt; main = do inFile &lt;- openFile “foo” ReadMode &lt; contents &lt;- hGetContents inFile &lt; putStr contents &lt; hClose inFile &lt; &lt; main = do inFile &lt;- openFile “foo” ReadMode &lt; contents &lt;- hGetContents inFile &lt; hClose inFile &lt; putStr contents</p>
-<p>Indeed, the  and  commands act on unrelated resources, and thus swapping them should have no observable effect. However, while the first program prints the `foo` file, the second one prints nothing. Indeed, because  reads the file lazily, the  operation has the effect to truncate the list. In the first program, printing the contents forces reading the file. One may argue that  should not be called in the first place — but then, closing the handle happens only when the  list can be garbage collected (in full), and relying on garbage collection for cleaning resources is brittle; furthermore this effect compounds badly with the first issue discussed above (unpredictability of buffering). If one wants to use lazy effectful computations, again, the compositionality principle is lost.</p>
+<p>Second, lazy evaluation does not extend nicely to effectful
+processing. That is, if (say) an input list is produced by reading a
+file lazily, one is exposed to losing referential transparency (as
+<span class="citation" data-cites="kiselyov_lazy_2013"></span> has shown). For example, one may rightfully
+expect<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> that both following programs have the same behavior:</p>
+<p>&lt; main = do inFile &lt;- openFile “foo” ReadMode
+&lt; contents &lt;- hGetContents inFile
+&lt; putStr contents
+&lt; hClose inFile
+&lt;
+&lt; main = do inFile &lt;- openFile “foo” ReadMode
+&lt; contents &lt;- hGetContents inFile
+&lt; hClose inFile
+&lt; putStr contents</p>
+<p>Indeed, the  and  commands act on unrelated
+resources, and thus swapping them should have no observable effect.
+However, while the first program prints the `foo` file, the second one
+prints nothing. Indeed, because  reads the file
+lazily, the  operation has the effect to truncate the
+list. In the first program, printing the contents forces reading the
+file. One may argue that  should not be called in the
+first place — but then, closing the handle happens only when the
+ list can be garbage collected (in full), and relying on
+garbage collection for cleaning resources is brittle; furthermore this
+effect compounds badly with the first issue discussed above
+(unpredictability of buffering). If one wants to use lazy effectful
+computations, again, the compositionality principle is lost.</p>
 <h2 id="repair-attempts">Repair attempts:</h2>
 <p>Define list.</p>
-<p>data LList a where (:) :: a -o LList a -o LList a [] :: LList a</p>
-<p>an intermediate linear list can <em>always</em> be eliminated. LList a</p>
-<section class="footnotes" role="doc-endnotes">
+<p>data LList a where
+(:) :: a -o LList a -o LList a
+[] :: LList a</p>
+<p>an intermediate linear list can <em>always</em> be eliminated.
+LList a</p>
+<section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr />
 <ol>
-<li id="fn1" role="doc-endnote"><p>This expectation is expressed in a Stack Overflow question, accessible at this URL: http://stackoverflow.com/questions/296792/haskell-io-and-closing-files<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>This expectation is expressed in a
+Stack Overflow question, accessible at this URL:
+http://stackoverflow.com/questions/296792/haskell-io-and-closing-files<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
-        </div>
-        <div id="footer">
-            Site generated by
-            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
-        </div>
-    </body>
+    </div>
+    <div id="footer">
+      Site generated by
+      <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+    </div>
+  </body>
 </html>

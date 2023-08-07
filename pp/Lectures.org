@@ -1,7 +1,7 @@
 #+TITLE: Programming Paradigms: Lecture Notes
 #+EMAIL: bernardy@chalmers.se
 #+HTML_HEAD_EXTRA: <link rel="stylesheet" type="text/css" href="pp.css" />
-
+#+LATEX_HEADER: \usepackage{svg}
 * ✪ What is a "programming paradigm"?
 ** Definition
 
@@ -935,7 +935,7 @@ Why GC discussed here?
 Firefox uses a GC, but still, it is leaking memory. What is going on?
 ** Question
 Why are imperative languages usually not using GC?
-* Object-oriented programming
+* Object-oriented programming <<objects>>
 ** Coupling data and related code
 *** Example: Date
 
@@ -1634,7 +1634,7 @@ arguments. The closure stores all the variables of the environment
 used in the argument.
 
 Note that there may be more kind of closures, so there may be more
-cases in [[(ref:closure definition)]].
+cases in (ref:closure definition).
 
 **** Definition: Closure
 

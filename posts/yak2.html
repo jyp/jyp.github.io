@@ -1,32 +1,31 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-        <title>The Spume of Years  - Designing an Ergo Keyboard (with Haskell and OpenSCAD)</title>
-        <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
-        <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
-        
-        <link rel="stylesheet" type="text/css" href="../css/home.css" />
-        
-    </head>
-    <body>
-        <div id="header">
-            <div id="logo">
-                <a href="../">Not JP's Blog</a>
-            </div>
-            <div id="navigation">
-                <a href="../">Home</a>
-                <a href="../about.html">About</a>
-                <a href="../contact.html">Contact</a>
-                <a href="../recent.html">Recent</a>
-            </div>
-        </div>
-
-        <div id="content">
-            <h1>Designing an Ergo Keyboard (with Haskell and OpenSCAD)</h1>
-
-            <div class="info">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Blog title  - Designing an Ergo Keyboard (with Haskell and OpenSCAD)</title>
+    <link rel="stylesheet" type="text/css" href="../css/navigation.css" />
+    <link rel="stylesheet" type="text/css" href="../css/syntax.css" />
+    
+    <link rel="stylesheet" type="text/css" href="../css/home.css" />
+    
+  </head>
+  <body>
+    <div id="header">
+      <div id="logo">
+        <a href="../">Blog title</a>
+      </div>
+      <div id="navigation">
+        <a href="../">Home</a>
+        <a href="../about.html">About</a>
+        <a href="../contact.html">Contact</a>
+        <a href="../recent.html">Recent</a>
+      </div>
+    </div>
+    
+    <div id="content">
+      <h1>Designing an Ergo Keyboard (with Haskell and OpenSCAD)</h1>
+      <div class="info">
     Last updated on February  1, 2020
     
         by Jean-Philippe Bernardy
@@ -39,12 +38,24 @@
 </div>
 
 <h1 id="yak-a-keyboard">YAK: A Keyboard</h1>
-<p>In an insanity period I decided that it was a good idea to design and build my own keyboard. More about the goals <a href="./yak1.html">here</a>. In this post I’ll give a glimpse of the design process and technologies involved.</p>
+<p>In an insanity period I decided that it was a good idea to design and
+build my own keyboard. More about the goals <a href="./yak1.html">here</a>. In this post I’ll
+give a glimpse of the design process and technologies involved.</p>
 <figure>
-<img src="../images/Yak-Perspective.jpg" alt="A shot of the Yak" /><figcaption aria-hidden="true">A shot of the Yak</figcaption>
+<img src="../images/Yak-Perspective.jpg" alt="A shot of the Yak" />
+<figcaption aria-hidden="true">A shot of the Yak</figcaption>
 </figure>
 <h1 id="the-technology">The technology</h1>
-<p>Of course I won’t be designing a keyboard in a WISIWIG CAD software (I don’t have enough sanity points remaining for that). Rather I want to program my desired constraints and let the machine do the rest. Fortunately we have OpenSCAD for that. However it’s rather limited in its expressive capabilities, so I have layered a <a href="https://hackage.haskell.org/package/hcad">Haskell interface</a> on top of it. (There is a “closure” program and library that I could have reused, but reading other people’s code is not my idea of fun. Plus, no types?!) Without going into too many details (I’ll give a complete course on another occasion), I am using types to track the relevant anchor points of shapes. Here is an example function to give a flavor of how to use it:</p>
+<p>Of course I won’t be designing a keyboard in a WISIWIG CAD software (I
+don’t have enough sanity points remaining for that). Rather I want to
+program my desired constraints and let the machine do the
+rest. Fortunately we have OpenSCAD for that. However it’s rather
+limited in its expressive capabilities, so I have layered a <a href="https://hackage.haskell.org/package/hcad">Haskell interface</a> on top of it. (There is a “closure” program and library that
+I could have reused, but reading other people’s code is not my idea of
+fun. Plus, no types?!) Without going into too many details (I’ll give
+a complete course on another occasion), I am using types to track the
+relevant anchor points of shapes. Here is an example function to give
+a flavor of how to use it:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="ot">corners ::</span> <span class="dt">HasCardinals</span> xs</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>        <span class="ot">=&gt;</span> <span class="dt">Part2</span> xs <span class="dt">R</span> <span class="ot">-&gt;</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Option</span> (<span class="dt">Part3</span> <span class="dt">ModelPoints</span> <span class="dt">R</span>))</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>        <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Option</span> (<span class="dt">Part3</span> ('[<span class="st">&quot;bottom&quot;</span>] <span class="op">:</span> '[<span class="st">&quot;top&quot;</span>] <span class="op">:</span> xs) <span class="dt">R</span>)</span>
@@ -54,27 +65,55 @@
 <span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>        loc x <span class="ot">=</span> <span class="dt">Loc</span> {locPoint <span class="ot">=</span> locPoint (relloc x)</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>                    ,locBase <span class="ot">=</span> locBase (zenith x)} <span class="co">-- direction is the same as original</span></span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>        corner x <span class="ot">=</span> withBase (loc x) (extrude (thickness x) (center relloc shape))</span></code></pre></div>
-<p>This function is a corner-post creating function that we’ll use below. It extrudes a post, with a given base shape, at each of the corner of a part (for each position in a grid). Of note is the addition of top and bottom anchors in the output type, meaning that we can refer to the top and bottom of the post we created.</p>
+<p>This function is a corner-post creating function that we’ll use
+below. It extrudes a post, with a given base shape, at each of the
+corner of a part (for each position in a grid). Of note is the
+addition of top and bottom anchors in the output type, meaning that we
+can refer to the top and bottom of the post we created.</p>
 <h1 id="an-ergo-design">An Ergo design</h1>
-<p>I wanted to design a split keyboard. This means a freer, more comfortable placement of the hands– and having to deal with smaller part. Placing ergonomy first, the next design decision is to find where to place the keys. I am assuming a relatively conventional touch-typing situation where each finger is taking care of pressing keys in a given column. (With the exception of thumbs which have may have several). Then there are several things to consider:</p>
-<ol>
+<p>I wanted to design a split keyboard. This means a freer, more
+comfortable placement of the hands– and having to deal with smaller
+part. Placing ergonomy first, the next design decision is to find
+where to place the keys. I am assuming a relatively conventional
+touch-typing situation where each finger is taking care of pressing
+keys in a given column. (With the exception of thumbs which have may
+have several). Then there are several things to consider:</p>
+<ol type="1">
 <li>The curvature of the column.</li>
 <li>Offset of the columns.</li>
 <li>Individual pitch, roll and (even yaw) of each key.</li>
 <li>How many rows should we have (per column)</li>
 </ol>
 <p>Let’s discuss the four fingers first.</p>
-<ol>
+<ol type="1">
 <li>I have decided to use a (positive?) curve. This basically</li>
 </ol>
-<p>matches the general grasping action of the hand, and I have had good experience with such keyboards in the past. I have used shorter radii for shorter fingers, using a mix of guessing, measuring and prototyping.</p>
-<ol>
-<li><p>I found that offsetting the columns is essential to maximize the reach of fingers. (I want to have as many keys as can be easily accessed.) When stretched out, the fingers have different reaches, and it is on this basis that the rows are staggered.</p></li>
-<li><p>The pitch of the digit (top?) row is low (almost flat), because the key pushing action happen in this direction. The rest of the curve increases the (forward) pitch of each key. I have even added a few degrees of forward pitch. This has a double effect: (a) it aligns (more) the keypresses with the grasping action. (b) it makes it easier to feel the limit between each row.</p>
-<p>I have added a bit of outward roll to the additional index finger column. I have also experimented with inward roll for the additional pinky row, but this did not work out. Indeed the pushing action seems to be directed in a parallel direction for this column.</p></li>
-<li><p>I have settled down on having a 4-row design, plus a 4-key cluster centered on the middle finger. Even though this is harder to wire, it seems to make best use of the range of each finger.</p></li>
+<p>matches the general grasping action of the hand, and I have had good
+experience with such keyboards in the past. I have used shorter radii
+for shorter fingers, using a mix of guessing, measuring and
+prototyping.</p>
+<ol type="1">
+<li><p>I found that offsetting the columns is essential to maximize the
+reach of fingers. (I want to have as many keys as can be easily
+accessed.) When stretched out, the fingers have different reaches,
+and it is on this basis that the rows are staggered.</p></li>
+<li><p>The pitch of the digit (top?) row is low (almost flat), because the key
+pushing action happen in this direction. The rest of the curve
+increases the (forward) pitch of each key. I have even added a few
+degrees of forward pitch. This has a double effect: (a) it aligns
+(more) the keypresses with the grasping action. (b) it makes it
+easier to feel the limit between each row.</p>
+<p>I have added a bit of outward roll to the additional index finger
+column. I have also experimented with inward roll for the
+additional pinky row, but this did not work out. Indeed the pushing
+action seems to be directed in a parallel direction for this column.</p></li>
+<li><p>I have settled down on having a 4-row design, plus a 4-key cluster
+centered on the middle finger. Even though this is harder to wire,
+it seems to make best use of the range of each finger.</p></li>
 </ol>
-<p>All these design decisions are captured in the following function. It is parameterized on a generating shape for each key (kModel), and the (i,j) location of the key in the matrix.</p>
+<p>All these design decisions are captured in the following function. It
+is parameterized on a generating shape for each key (kModel), and the
+(i,j) location of the key in the matrix.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="ot">fingers ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Part3</span> xs <span class="dt">R</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Option</span> (<span class="dt">Part</span> xs <span class="dt">V3'</span> <span class="dt">R</span>)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fingers kModel i <span class="ot">=</span></span>
 <span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  rowBounds <span class="op">$</span></span>
@@ -108,7 +147,15 @@
 <span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>        ofs i <span class="ot">=</span> (fLen <span class="dv">4</span> <span class="op">-</span> fLen i)</span>
 <span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>        ki <span class="ot">=</span> \j <span class="ot">-&gt;</span> intrinsicPitch (<span class="op">-</span>iPitch) (kModel i j)</span>
 <span id="cb2-33"><a href="#cb2-33" aria-hidden="true" tabindex="-1"></a>        iPitch <span class="ot">=</span> <span class="dv">7</span><span class="op">*</span>degree</span></code></pre></div>
-<p>For thumbs, I tried to make one row activated with downward presses, and one row activated with forward ones. It is even possible to press both keys in a columns simultaneously, which can be useful for (rare) key combinations. The slightly larger keycaps mean that it is possible to activate the keys without feeling the ridge of (spherical) keycaps too much. Cylindrical keycaps would also be an option. A final option would be to use a reverse curvature for the thumb keycaps, like The KeyboardIO model 01, but I am not a fan. (Such keycaps may also be hard to source.)</p>
+<p>For thumbs, I tried to make one row activated with downward presses,
+and one row activated with forward ones. It is even possible to press
+both keys in a columns simultaneously, which can be useful for (rare)
+key combinations. The slightly larger keycaps mean that it is
+possible to activate the keys without feeling the ridge of (spherical)
+keycaps too much. Cylindrical keycaps would also be an option. A
+final option would be to use a reverse curvature for the thumb
+keycaps, like The KeyboardIO model 01, but I am not a fan. (Such
+keycaps may also be hard to source.)</p>
 <p>Here is the less insightful Haskell generator for the thumb cluster:</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="ot">thumb ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Part3</span> xs <span class="dt">R</span>) <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Option</span> (<span class="dt">Part</span> xs <span class="dt">V3'</span> <span class="dt">R</span>)</span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>thumb kModel i j </span>
@@ -130,35 +177,55 @@
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>    kModel i j</span>
 <span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a>    <span class="kw">where</span> homeIndexPoint <span class="ot">=</span> fingerLoc fingers <span class="dv">1</span> <span class="dv">0</span> </span></code></pre></div>
 <h1 id="physical-constraints">Physical constraints</h1>
-<p>The next thing to do is to measure switches and keycaps. This information can be used to deduce the location of the switches. At this point I have generated a model of keycaps and switches, which allows me to check that keyswitches do not run into each other, and likewise for keycaps, as they are pressed.</p>
+<p>The next thing to do is to measure switches and keycaps. This
+information can be used to deduce the location of the switches. At
+this point I have generated a model of keycaps and switches, which
+allows me to check that keyswitches do not run into each other, and
+likewise for keycaps, as they are pressed.</p>
 <figure>
-<img src="../images/yak-keys.png" alt="Preview of the layout of keyswitches" /><figcaption aria-hidden="true">Preview of the layout of keyswitches</figcaption>
+<img src="../images/yak-keys.png" alt="Preview of the layout of keyswitches" />
+<figcaption aria-hidden="true">Preview of the layout of keyswitches</figcaption>
 </figure>
 <h1 id="the-mounting-frame">The mounting frame</h1>
-<p>When content with the design, it’s time to build a model of the frame, where the switches will be mounted. This is a pipeline with the following phases:</p>
-<ol>
+<p>When content with the design, it’s time to build a model of the frame,
+where the switches will be mounted. This is a pipeline with the
+following phases:</p>
+<ol type="1">
 <li>place a post at the corner of each switches.</li>
 <li>take the convex hull between at each neighboring 4 such squares</li>
 <li>take the union of all that</li>
-<li>cut out mounts for the switches, and remove any material which would interfere with keycap travels</li>
+<li>cut out mounts for the switches, and remove any material which
+would interfere with keycap travels</li>
 </ol>
-<p>At this stage I have sometimes realized that the frame was not structurally coherent (to many/much holes have been cut). And went back to the drawing board.</p>
+<p>At this stage I have sometimes realized that the frame was not
+structurally coherent (to many/much holes have been cut). And went
+back to the drawing board.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">frame ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Part3</span> <span class="dt">ModelPoints</span> <span class="dt">R</span>) <span class="ot">-&gt;</span> <span class="dt">Part</span> '[] <span class="dt">V3'</span> <span class="dt">R</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>frame base_ <span class="ot">=</span> ug (webbing (corners (rectangle <span class="op">$</span> <span class="fu">pure</span> segmentHeight) (hand base_)))</span></code></pre></div>
 <figure>
-<img src="../images/yak-frame.png" alt="The final Yak frame model" /><figcaption aria-hidden="true">The final Yak frame model</figcaption>
+<img src="../images/yak-frame.png" alt="The final Yak frame model" />
+<figcaption aria-hidden="true">The final Yak frame model</figcaption>
 </figure>
-<p>One point about the mounts: the tolerance for the hole will vary with the characteristics of the manufacturing process. (Prototypes to the rescue!)</p>
+<p>One point about the mounts: the tolerance for the hole will vary with
+the characteristics of the manufacturing process. (Prototypes to the
+rescue!)</p>
 <figure>
-<img src="../images/yak-frame-phy.jpg" alt="Physical realisation" /><figcaption aria-hidden="true">Physical realisation</figcaption>
+<img src="../images/yak-frame-phy.jpg" alt="Physical realisation" />
+<figcaption aria-hidden="true">Physical realisation</figcaption>
 </figure>
 <h1 id="the-rest">The rest</h1>
-<p>What remains is to build an enclosure, so that the frame can rest on something an the electronics (including the microcontroller) are safe from harm. In short, to build the enclosure, the leading principle is to project frame-like objects onto the base plane, and use various boolean operations between such projections. Then you need to figure out where to attach the microcontroller, the ports and how everything attaches together.</p>
+<p>What remains is to build an enclosure, so that the frame can rest on
+something an the electronics (including the microcontroller) are safe
+from harm. In short, to build the enclosure, the leading principle is
+to project frame-like objects onto the base plane, and use various
+boolean operations between such projections. Then you need to figure
+out where to attach the microcontroller, the ports and how everything
+attaches together.</p>
 
-        </div>
-        <div id="footer">
-            Site generated by
-            <a href="http://jaspervdj.be/hakyll">Hakyll</a>
-        </div>
-    </body>
+    </div>
+    <div id="footer">
+      Site generated by
+      <a href="http://jaspervdj.be/hakyll">Hakyll</a>
+    </div>
+  </body>
 </html>

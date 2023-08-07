@@ -8,8 +8,24 @@
         <name>Jean-Philippe Bernardy</name>
         <email>jeanphilippe.bernardy@gmail.com</email>
     </author>
-    <updated>2022-01-16T00:00:00Z</updated>
+    <updated>2023-09-01T00:00:00Z</updated>
     <entry>
+    <title>Proportional fonts in Emacs</title>
+    <link href="https://jyp.github.io/posts/variable-pitch.html" />
+    <id>https://jyp.github.io/posts/variable-pitch.html</id>
+    <published>2023-09-01T00:00:00Z</published>
+    <updated>2023-09-01T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
+    <title>Representation of Polynomials using 'gasp'</title>
+    <link href="https://jyp.github.io/posts/polynomials.html" />
+    <id>https://jyp.github.io/posts/polynomials.html</id>
+    <published>2022-01-20T00:00:00Z</published>
+    <updated>2022-01-20T00:00:00Z</updated>
+    <summary type="html"><![CDATA[This is the post description]]></summary>
+</entry>
+<entry>
     <title>Another Keyboard, Yet Again</title>
     <link href="https://jyp.github.io/posts/yakV2.html" />
     <id>https://jyp.github.io/posts/yakV2.html</id>
