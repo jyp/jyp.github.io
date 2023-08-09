@@ -7,12 +7,12 @@
         <description><![CDATA[This feed provides JP's latests posts]]></description>
         <atom:link href="https://jyp.github.io/rss.xml" rel="self"
                    type="application/rss+xml" />
-        <lastBuildDate>Fri, 01 Sep 2023 00:00:00 UT</lastBuildDate>
+        <lastBuildDate>Wed, 09 Aug 2023 00:00:00 UT</lastBuildDate>
         <item>
     <title>Proportional fonts in Emacs</title>
     <link>https://jyp.github.io/posts/variable-pitch.html</link>
     <description><![CDATA[This is the post description]]></description>
-    <pubDate>Fri, 01 Sep 2023 00:00:00 UT</pubDate>
+    <pubDate>Wed, 09 Aug 2023 00:00:00 UT</pubDate>
     <guid>https://jyp.github.io/posts/variable-pitch.html</guid>
     <dc:creator>Jean-Philippe Bernardy</dc:creator>
 </item>
