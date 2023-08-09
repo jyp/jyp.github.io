@@ -88,13 +88,14 @@ with a monospace font, but they won’t be with a proportional one.</p>
                                                   arg2,
                                                   arg3)
 </code></pre>
-<p>In some languages, such as Haskell, this kind of indentation is
-significant. So it must be taken care of. Fortunately, there is an
-solution to this issue. It suffices to set the width of space
-characters belonging to the indentation to be the same as the width of
-the character directly above them. It is possible to implement this
-because Emacs provides means to query the pixel size of displayed
-characters. Yay!</p>
+<p>This sort of alignment convention is found in many languages. For
+instance it pervasive in lisps. In some languages, such as Haskell,
+it is even meaningful for the compiler. So it must be taken care
+of. Fortunately, there is an solution to this issue. It suffices to
+set the width of space characters belonging to the indentation to be
+the same as the width of the character directly above them. It is
+possible to implement this because Emacs provides means to query the
+pixel size of displayed characters. Yay!</p>
 <p>Some further complication happens because indentation is sometimes
 implemented by tabulation characters. The solution is to treat each
 tabulation character as the number of spaces that it would stand for
@@ -133,16 +134,17 @@ packages are written with proportional fonts in mind.</p>
 <p>The Vertico package has special support for variable pitch fonts: it
 correctly aligns the annotations provided by marginalia!</p>
 <h3 id="info">Info</h3>
-<p>The standard <code>info</code> package correctly aligns menus</p>
+<p>The standard <code>info</code> package correctly aligns menus.</p>
 <h1 id="bugs-workarounds-and-shortcomings">Bugs, workarounds and shortcomings</h1>
-<h2 id="bug-window-text-pixel-size">BUG: window-text-pixel-size</h2>
+<h2 id="bug-in-window-text-pixel-size">Bug in window-text-pixel-size</h2>
 <p>The technique to query the size of a character (or any text) in pixels
 involves using <code>window-text-pixel-size</code>. Unfortunately it is buggy in
 Emacs 28 and 29.1. One of the problem is witnessed by the following example.
 Copy it in a scratch elisp file and evaluate the last line:</p>
-<pre class="elisp"><code>;m soe text here
+<pre class="elisp"><code>;m some text here
 ;x
-;^--- 2nd character of following lines have wrong window-text-pixel-size if measured on their own.
+;^--- 2nd character of following lines have wrong
+; window-text-pixel-size if measured on their own.
 ;;note presence of NARROW NO-BREAK SPACE in the 1st line
 
 (window-text-pixel-size nil 19 20) ; returns (0 . 27)
@@ -150,7 +152,7 @@ Copy it in a scratch elisp file and evaluate the last line:</p>
 <p>Fortunately, as far as I can tell, this bug can always be worked
 around by computing the size of multiple-character regions which
 overlap and subtract them.</p>
-<h2 id="bug-org-mode-tables">BUG: org-mode tables</h2>
+<h2 id="bug-in-org-mode-tables">Bug in org-mode tables</h2>
 <p>Tables do not work with proportional fonts because org-mode
 automatically pads them with several spaces. At the time of writing,
 the algorithm which does this appears to assume a monospace font, and
@@ -164,9 +166,17 @@ following workaround seems to fix the problem:</p>
 </code></pre>
 <h2 id="shortcomings">Shortcomings</h2>
 <p>The following packages and functions would benefit from special support
-for proportional fonts. This is not an exhaustive list, just a few
+for proportional fonts. This is not an exhaustive list (yet), just a few
 things that I personally use or that I was made aware of.</p>
 <ul>
+<li>org-mode code block can be configured to be fontified
+“natively”. This means that the normal major mode for the code block
+will be used for fontification. org-mode does this by creating a
+temporary buffer with the contents of the block, and set the
+appropriate major mode. Unfortunately it does so at each keystroke,
+and the process of computing elastic indentation is too slow for
+that. (Currently it is done somewhat lazily.) So, it is currently
+recommended to use a monospace font in org-mode source blocks.</li>
 <li>marginalia: if the marginal data is multi field, then the
 corresponding columns are not aligned. (See for example
 <code>describe-command</code> with marginalia enabled.)</li>
@@ -174,12 +184,9 @@ corresponding columns are not aligned. (See for example
 <li>helm: shows incorrectly aligned columns</li>
 <li>dired: shows incorrectly aligned columns</li>
 <li><code>describe-face</code> shows incorrectly aligned columns</li>
-</ul>
-<h1 id="further-reading">Further reading</h1>
-<ul>
-<li><a href="https://input.djr.com/info/">INPUT: a family of proportional fonts for programming</a></li>
-<li></li>
-<li><a href="https://nick-gravgaard.com/elastic-tabstops/">Elastic tabstops</a></li>
+<li>Emacs manual: many functions that have a bullet list in their
+documentation use indentation to make it stand out. Unfortunately
+elastic indent is not used to “typeset” such lists.</li>
 </ul>
 
     </div>

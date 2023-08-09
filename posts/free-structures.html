@@ -71,10 +71,10 @@ can do on the left of <code>Mempty</code> is embed. We obtain:</p>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Mappend</span><span class="ot"> ::</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t <span class="ot">-&gt;</span> <span class="dt">FreeMonoid</span> t</span>
 <span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">Mempty</span><span class="ot"> ::</span> <span class="dt">FreeMonoid</span> t</span></code></pre></div>
 <p>This is simply the list type. While it is indeed a free monoid, it has
-some problems, such as an expensive append. To address this, one could
+some problems, such as an expensive append. To address this issue, one could
 choose to use the first representation, and simply make sure that no
 program makes observable identified objects;
-for example by making the type private and having an interpretation
+for example by making the type private (exporting it abstractly) and having an interpretation
 function <code>fold</code> which does not expose the structure.</p>
 <h2 id="final-encoding">Final encoding</h2>
 <p>Another useful representation of free structures is the so called
@@ -104,7 +104,7 @@ first two components by a constraint that α has a monoid structure.</p>
 about laws any more. Rather, we pass the buck to the <code>Monoid a</code>
 instance. If it satisfies the laws, then our encoding will
 automatically satisfy them as well.
-Consequently, we can even generalise the above to any free structure, thanks to
+Consequently, we can even generalise the above free construction to any structure represented as a Haskell class, thanks to
 the support of GHC for abstracting over constraints:</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">newtype</span> <span class="dt">Free0</span> k t <span class="ot">=</span> <span class="dt">Free0</span> (<span class="kw">forall</span> a<span class="op">.</span> k a <span class="ot">=&gt;</span> (t → a) → a)</span></code></pre></div>
 <p>Before closing this section, let’s make sure we did not delude
