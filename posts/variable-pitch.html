@@ -26,7 +26,7 @@
     <div id="content">
       <h1>Proportional fonts in Emacs</h1>
       <div class="info">
-    Last updated on August  9, 2023
+    Last updated on August 11, 2023
     
         by Jean-Philippe Bernardy
     
@@ -48,25 +48,24 @@ them.</p>
 <h1 id="why-proportional-fonts">Why proportional fonts?</h1>
 <p>Simply put, proportional fonts are better than monospace fonts, <a href="https://storck.io/posts/proportional-programming-code-fonts/">even for programming</a>. This is the case at least for Latin or Greek
 scripts and mathematical symbols, which is what I’m using. This fact
-is partially due to cultural background, and partly due to the greater
-liberty that proportional fonts allow. Speaking from personal
-experience, I invariably feel more comfortable reading text typeset in
-proportional fonts rather than in monospace fonts. Besides,
-proportional fonts tend to use less horizontal space than monospace
-fonts, saving precious screen space.</p>
+partly due to the greater liberty that proportional fonts
+allow. Speaking from personal experience, I invariably feel more
+comfortable reading text typeset in proportional fonts rather than in
+monospace fonts. Besides, proportional fonts tend to use less
+horizontal space than monospace fonts, saving precious screen space.</p>
 <p>However there can be reasons for using monospace fonts. Such reasons
 are originally only technical. In particular, early printers and
 terminals could only support a fixed grid of characters. Such devices
 are not in common use nowadays, but they influenced software strongly
 enough that the monospace assumption persists to this day in many
 contexts. In sum, there is a cultural bias for using monospace fonts,
-in particular for programming.</p>
-<p>I want to experiment and ignore this cultural bias as much as
-possible. Emacs being an eminently customizable piece of software, I
-want to investigate how far I can push the use of proportional fonts,
-and report where I face technical limitations.</p>
+in particular for programming. I want to experiment and ignore this
+cultural bias as much as possible. Emacs being an eminently
+customizable piece of software, I want to investigate how far I can
+push the use of proportional fonts, and report where I face technical
+limitations.</p>
 <h1 id="successes">Successes</h1>
-<p>Graphical Emacs backhands support proportional fonts alright, so we’re
+<p>Graphical Emacs backends support proportional fonts alright, so we’re
 already a long way there.</p>
 <h2 id="programming">Programming</h2>
 <p>We face the problem that programmers very often take advantage of
@@ -93,17 +92,26 @@ instance it pervasive in lisps. In some languages, such as Haskell,
 it is even meaningful for the compiler. So it must be taken care
 of. Fortunately, there is an solution to this issue. It suffices to
 set the width of space characters belonging to the indentation to be
-the same as the width of the character directly above them. It is
-possible to implement this because Emacs provides means to query the
-pixel size of displayed characters. Yay!</p>
-<p>Some further complication happens because indentation is sometimes
-implemented by tabulation characters. The solution is to treat each
-tabulation character as the number of spaces that it would stand for
-in a monospace context.</p>
+the same as the width of the character directly above them, like so:</p>
+<figure>
+<img src="../images/elastic-simple.gif" alt="elastic-indent-mode: simple example" />
+<figcaption aria-hidden="true">elastic-indent-mode: simple example</figcaption>
+</figure>
+<p>It is possible to implement this because Emacs provides means to query
+the pixel size of displayed characters. Yay! Some further
+complication happens because indentation is sometimes implemented by
+tabulation characters. The solution is to treat each tabulation
+character as the number of spaces that it would stand for in a
+monospace context.</p>
 <p>This idea was proposed and implemented by <a href="https://github.com/tenbillionwords/spaceship-mode">Scott Messick</a> I added
 support for tabs, optimized it and added support for indentation
 guides, resulting in the <a href="https://github.com/jyp/elastic-modes">elastic-modes</a> package. This package also
-supports tabular alignment.</p>
+supports tabular alignment, and can also be configured to show
+indentation guides.</p>
+<figure>
+<img src="../images/elastic-indent.gif" alt="elastic-indent-mode on itself" />
+<figcaption aria-hidden="true">elastic-indent-mode on itself</figcaption>
+</figure>
 <h3 id="tabular-alignment">Tabular alignment</h3>
 <p>The second kind of alignment is tables, such as:</p>
 <pre class="example"><code>some_variable       = value1
@@ -169,7 +177,7 @@ following workaround seems to fix the problem:</p>
 for proportional fonts. This is not an exhaustive list (yet), just a few
 things that I personally use or that I was made aware of.</p>
 <ul>
-<li>org-mode code block can be configured to be fontified
+<li><code>org-mode</code> code blocks can be configured to be fontified
 “natively”. This means that the normal major mode for the code block
 will be used for fontification. org-mode does this by creating a
 temporary buffer with the contents of the block, and set the
@@ -177,17 +185,19 @@ appropriate major mode. Unfortunately it does so at each keystroke,
 and the process of computing elastic indentation is too slow for
 that. (Currently it is done somewhat lazily.) So, it is currently
 recommended to use a monospace font in org-mode source blocks.</li>
-<li>marginalia: if the marginal data is multi field, then the
+<li><code>marginalia</code>: if the marginal data is multi field, then the
 corresponding columns are not aligned. (See for example
 <code>describe-command</code> with marginalia enabled.)</li>
-<li>which-key: shows incorrectly aligned columns</li>
-<li>helm: shows incorrectly aligned columns</li>
-<li>dired: shows incorrectly aligned columns</li>
+<li><code>which-key</code> shows incorrectly aligned columns</li>
+<li><code>helm</code> shows incorrectly aligned columns</li>
+<li><code>dired</code> shows incorrectly aligned columns. (But it’s unclear if it can adapt at all to proportional fonts.)</li>
 <li><code>describe-face</code> shows incorrectly aligned columns</li>
-<li>Emacs manual: many functions that have a bullet list in their
-documentation use indentation to make it stand out. Unfortunately
-elastic indent is not used to “typeset” such lists.</li>
+<li>In the Emacs manual, the description of keymaps are not aligned properly.</li>
 </ul>
+<figure>
+<img src="../images/manual-keymap.png" alt="Badly aligned keymap description" />
+<figcaption aria-hidden="true">Badly aligned keymap description</figcaption>
+</figure>
 
     </div>
     <div id="footer">
