@@ -33,7 +33,7 @@
 </div>
 <div class="info">
     
-        Tags: <a title="All pages tagged 'Emacs'." href="../tags/Emacs.html">Emacs</a>
+        Tags: <a title="All pages tagged 'Emacs'." href="../tags/Emacs.html" rel="tag">Emacs</a>
     
 </div>
 
@@ -55,24 +55,24 @@ monospace fonts. Besides, proportional fonts tend to use less
 horizontal space than monospace fonts, saving precious screen space.</p>
 <p>However there can be reasons for using monospace fonts. Such reasons
 are originally only technical. In particular, early printers and
-terminals could only support a fixed grid of characters. Such devices
-are not in common use nowadays, but they influenced software strongly
-enough that the monospace assumption persists to this day in many
-contexts. In sum, there is a cultural bias for using monospace fonts,
-in particular for programming. I want to experiment and ignore this
-cultural bias as much as possible. Emacs being an eminently
-customizable piece of software, I want to investigate how far I can
-push the use of proportional fonts, and report where I face technical
-limitations.</p>
+terminals could only support displaying characters at fixed
+positions. Such devices are no longer in common use, but they
+influenced software strongly enough that the monospace assumption
+persists to this day in many contexts. In sum, there is a cultural
+bias for using monospace fonts, in particular for programming. I want
+to experiment and ignore this cultural bias as much as possible. As an
+Emacs user, I could customize it to use of proportional fonts as much
+as possible. I’ll report here where I faced technical limitations.</p>
 <h1 id="successes">Successes</h1>
-<p>Graphical Emacs backends support proportional fonts alright, so we’re
-already a long way there.</p>
+<p>Graphical Emacs backends support displaying proportional fonts. The
+main kind of problem that we face is that proportional fonts break the
+assumptions of certain Emacs packages, and source files.</p>
 <h2 id="programming">Programming</h2>
-<p>We face the problem that programmers very often take advantage of
-monospace fonts to align code, typically by padding code with extra
-spaces (or tabs). There are two classes of alignments: alignment
-relative to the start of the line (widely known as <em>indentation</em>), and
-what will call tabular alignment.</p>
+<p>The main problem that we face is that programmers very often take
+advantage of monospace fonts to align code, typically by padding code
+with extra spaces (or tabs). There are two classes of alignments:
+alignment relative to the start of the line (widely known as
+<em>indentation</em>), and what will call tabular alignment.</p>
 <h3 id="indentation">Indentation</h3>
 <p>The problem of indenting with proportional fonts is that the space
 character is typically narrower than most other
@@ -80,8 +80,8 @@ characters. Consequently, an indented line can appear to have a lower
 indentation than it actually has. An idea is to use <a href="https://input.djr.com/info/">a font with large enough spaces</a>, but even then lines will not line up <em>exactly</em>. This
 isn’t a huge problem if indentation needs only be correct relative to
 other indented lines, but it becomes very significant if indentation
-must be correct relatively to a non-indented line. For instance,
-<code>arg1</code>, <code>arg2</code> and <code>arg3</code> should are lined up in the example below,
+must be correct relatively to a less indented line. For instance,
+<code>arg1</code>, <code>arg2</code> and <code>arg3</code> are alined in the example below,
 with a monospace font, but they won’t be with a proportional one.</p>
 <pre class="example"><code>some_long_function_name_with_many_wide_characters(arg1,
                                                   arg2,
@@ -94,60 +94,61 @@ of. Fortunately, there is an solution to this issue. It suffices to
 set the width of space characters belonging to the indentation to be
 the same as the width of the character directly above them, like so:</p>
 <figure>
-<img src="../images/elastic-simple.gif" alt="elastic-indent-mode: simple example" />
-<figcaption aria-hidden="true">elastic-indent-mode: simple example</figcaption>
+<img src="../images/elastic-simple.gif" />
+<figcaption>elastic-indent-mode: simple example</figcaption>
 </figure>
-<p>It is possible to implement this because Emacs provides means to query
-the pixel size of displayed characters. Yay! Some further
-complication happens because indentation is sometimes implemented by
+<p>It is possible to implement this as a package, because Emacs provides
+means to query the pixel size of displayed characters. Some further
+complications happen because indentation is sometimes implemented by
 tabulation characters. The solution is to treat each tabulation
-character as the number of spaces that it would stand for in a
-monospace context.</p>
-<p>This idea was proposed and implemented by <a href="https://github.com/tenbillionwords/spaceship-mode">Scott Messick</a> I added
+character as the spaces that it would stand for in a monospace
+context.</p>
+<p>This idea was proposed and implemented by <a href="https://github.com/tenbillionwords/spaceship-mode">Scott Messick</a>. I added
 support for tabs, optimized it and added support for indentation
 guides, resulting in the <a href="https://github.com/jyp/elastic-modes">elastic-modes</a> package. This package also
-supports tabular alignment, and can also be configured to show
-indentation guides.</p>
+supports tabular alignment, discussed below.</p>
 <figure>
-<img src="../images/elastic-indent.gif" alt="elastic-indent-mode on itself" />
-<figcaption aria-hidden="true">elastic-indent-mode on itself</figcaption>
+<img src="../images/elastic-indent.gif" />
+<figcaption>elastic-indent-mode on itself</figcaption>
 </figure>
 <h3 id="tabular-alignment">Tabular alignment</h3>
-<p>The second kind of alignment is tables, such as:</p>
+<p>The second kind of alignment is constituted of table-like pieces of
+code, such as:</p>
 <pre class="example"><code>some_variable       = value1
 some_other_variable = value2
 a_third_variable    = value3
 </code></pre>
-<p>Unfortunately, the previous solution does not apply, because each line
-involve different non-space characters in general. Fortunately, this
-kind of spacing is typically non-significant, even in Haskell. So, for
-this kind of application, it is possible to use
-<a href="https://nick-gravgaard.com/elastic-tabstops/">elastic tabstops</a>. The idea is to use tabulation characters to
-separate column in the table, and let the editor lineup the
-columns. (The link above shows elastic tabstops in action.) A pleasant
-characteristic of this convention is that it one of the original uses
-of tabstops on typewriters. Consequently, in some situations the table
-may be displayed correctly in an editor which uses plain tabstops and
-a monospace font.</p>
+<p>Unfortunately, simply changing the widths of space characters does not
+work to preserve this kind of alignment, because each line in the table
+involves different non-space characters in general. Fortunately, this
+kind of spacing is typically insignificant, even in Haskell programs. So, for
+this kind of application, it is possible to use <a href="https://nick-gravgaard.com/elastic-tabstops/">elastic tabstops</a>. The
+idea is to use tabulation characters to separate columns in the table,
+and let the editor align the columns. (The link above shows elastic
+tabstops in action.) A pleasant characteristic of this convention is
+that it mimics one of the original uses of tabstops on
+typewriters. Consequently, in some situations the table may be
+displayed correctly in an editor which uses plain tabstops and a
+monospace font.</p>
 <h2 id="org-mode">Org-mode</h2>
-<p>Org mode is mostly for inputting free-form text, and as such does not
+<p>Org mode’s purpose is mostly to input free-form text, and as such does not
 suffer from much cultural bias towards monospace. You will however
 want to configure Emacs to use a monospace font for certain elements,
 such as check-boxes and tables (See below).</p>
-<h2 id="gold-medals">Gold medals</h2>
+<h2 id="medals">Medals</h2>
 <p>Some packages already have special support for proportional fonts. I’d
-love it if this is the beginning of a trend and it is expected that
-packages are written with proportional fonts in mind.</p>
-<h3 id="vertico">Vertico</h3>
-<p>The Vertico package has special support for variable pitch fonts: it
+love it if this were the beginning of a trend and it would be expected
+for packages to support proportional fonts.</p>
+<h3 id="vertico">Vertico 🏅</h3>
+<p>The Vertico package has special support for proportional fonts: it
 correctly aligns the annotations provided by marginalia!</p>
-<h3 id="info">Info</h3>
+<h3 id="info">Info 🥈</h3>
 <p>The standard <code>info</code> package correctly aligns menus.</p>
 <h1 id="bugs-workarounds-and-shortcomings">Bugs, workarounds and shortcomings</h1>
-<h2 id="bug-in-window-text-pixel-size">Bug in window-text-pixel-size</h2>
+<h2 id="former-bug-in-window-text-pixel-size">Former bug in window-text-pixel-size 🐛</h2>
 <p>The technique to query the size of a character (or any text) in pixels
-involves using <code>window-text-pixel-size</code>. Unfortunately it is buggy in
-Emacs 28 and 29.1. One of the problem is witnessed by the following example.
+involves using the <code>window-text-pixel-size</code> function. Unfortunately it is buggy in
+Emacs 28 and 29.1. One of the problem is witnessed by the following example. (<strong>Update: this particular bug is fixed in Emacs 30!</strong>)
 Copy it in a scratch elisp file and evaluate the last line:</p>
 <pre class="elisp"><code>;m some text here
 ;x
@@ -159,32 +160,38 @@ Copy it in a scratch elisp file and evaluate the last line:</p>
 </code></pre>
 <p>Fortunately, as far as I can tell, this bug can always be worked
 around by computing the size of multiple-character regions which
-overlap and subtract them.</p>
-<h2 id="bug-in-org-mode-tables">Bug in org-mode tables</h2>
-<p>Tables do not work with proportional fonts because org-mode
+overlap and subtract them. I have implemented this workaround in
+elastic-indent-mode with good results so far.</p>
+<h2 id="bug-in-org-mode-tables">Bug in org-mode tables 🐛</h2>
+<p>Org-mode tables do not work with proportional fonts because org-mode
 automatically pads them with several spaces. At the time of writing,
-the algorithm which does this appears to assume a monospace font, and
-thus computes incorrect results for proportional fonts.</p>
+the algorithm which does this padding appears to assume a monospace
+font, and thus computes incorrect results for proportional fonts.</p>
 <p>Unfortunately, the bug goes deeper. Indeed, if you set your default
-font to proportional, but set the table font to be monospace, you get
-wrong results. This appears to be because org-mode attempts to deal
-with double-width characters. If you don’t use those, then the
-following workaround seems to fix the problem:</p>
+font to proportional, but set the <code>org-table</code> face to be monospace,
+you get wrong results. This appears to be due to org-mode attempting
+to deal with double-width characters. If you don’t use those, then
+the following workaround seems to fix the problem:</p>
 <pre class="elisp"><code>(fset 'org-string-width 'org--string-width-1)
 </code></pre>
-<h2 id="shortcomings">Shortcomings</h2>
+<h2 id="agda">Agda 💩</h2>
+<p>The Agda mode appear to apply its own styling in a non-standard way,
+overriding the spacing set with elastic-indent-mode.</p>
+<h2 id="shortcomings">Shortcomings 🤷</h2>
 <p>The following packages and functions would benefit from special support
 for proportional fonts. This is not an exhaustive list (yet), just a few
 things that I personally use or that I was made aware of.</p>
 <ul>
-<li><code>org-mode</code> code blocks can be configured to be fontified
+<li>Org-mode code blocks can be configured to be fontified
 “natively”. This means that the normal major mode for the code block
-will be used for fontification. org-mode does this by creating a
-temporary buffer with the contents of the block, and set the
-appropriate major mode. Unfortunately it does so at each keystroke,
+will be used for fontification. Org-mode does this by creating a
+temporary buffer with the contents of the block, set the
+appropriate major mode it it, and copy the propertized text into the block.
+Unfortunately it does so at each keystroke,
 and the process of computing elastic indentation is too slow for
 that. (Currently it is done somewhat lazily.) So, it is currently
 recommended to use a monospace font in org-mode source blocks.</li>
+<li><code>org-calendar</code> shows incorrectly aligned columns in the calendar view.</li>
 <li><code>marginalia</code>: if the marginal data is multi field, then the
 corresponding columns are not aligned. (See for example
 <code>describe-command</code> with marginalia enabled.)</li>
@@ -195,8 +202,8 @@ corresponding columns are not aligned. (See for example
 <li>In the Emacs manual, the description of keymaps are not aligned properly.</li>
 </ul>
 <figure>
-<img src="../images/manual-keymap.png" alt="Badly aligned keymap description" />
-<figcaption aria-hidden="true">Badly aligned keymap description</figcaption>
+<img src="../images/manual-keymap.png" />
+<figcaption>Badly aligned keymap description</figcaption>
 </figure>
 
     </div>

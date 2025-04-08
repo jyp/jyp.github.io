@@ -33,7 +33,7 @@
 </div>
 <div class="info">
     
-        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>, <a title="All pages tagged 'continuations'." href="../tags/continuations.html">continuations</a>
+        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html" rel="tag">Haskell</a>, <a title="All pages tagged 'continuations'." href="../tags/continuations.html" rel="tag">continuations</a>
     
 </div>
 
@@ -79,7 +79,7 @@ going to get into why here.)</p>
 <p>The choice of either Mu or Nu lists influences the set of functions
 which can be fused. When the choice is automatic (as in all the
 user-facing shortcut fusion facilities currently available), the programmer is at the
-mercy of the choice made by the implementer. On the other hand, if the
+mercy of the choice made by the compiler implementer. On the other hand, if the
 programmer controls the choice, they can pick the best representation
 for the job at hand. However, to make a sensible choice one must have
 a good grasp of which representation is good for what. Let me try to
@@ -127,7 +127,7 @@ result (slave). Thus, we can write a fusible implementation, as follows:</p>
 mixing several Nu’s and Mu’s.)</p>
 <h1 id="not-so-good-citizens">Not so good citizens</h1>
 <p>Not all programs have a single master. One way to proceed is to
-provide conversion functions from Mu to Nu and vice-versa. These
+provide conversion functions between slaves and masters, i.e. from Mu to Nu and vice-versa. These
 functions won’t be fusible, but the programmer will know exactly when
 fusion does not happen, since they’ll call those functions explicitly.</p>
 <h2 id="nu-to-mu">Nu to Mu</h2>
@@ -144,8 +144,7 @@ as the lists are being consumed or produced by the <code>loop</code>.</p>
 <p>What happens when we convert a master to a slave? Is such a function
 impossible to write? No! It just means that we have to allocate a
 buffer so that the master can proceed at its own pace. This in turn
-means that we have to allocate an intermediate data structure, and
-thus that fusion can’t happen.</p>
+means that we have to allocate an intermediate data structure. That is, fusion can’t happen.</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="ot">alloc ::</span> <span class="dt">Mu</span> f <span class="ot">-&gt;</span> <span class="dt">Nu</span> f</span></code></pre></div>
 <p>The only means to do this in Haskell is also recursion; this time in
 the definition of a data type:</p>
@@ -176,19 +175,22 @@ the following implementations:</p>
 <span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>muWalk s <span class="ot">=</span> <span class="dt">Mu</span> <span class="op">$</span> \phi <span class="ot">-&gt;</span> fixFold phi s</span></code></pre></div>
 <p>Because no Haskell blog post is complete without a little proof, we
 can finish by showing that <code>loop = muWalk . nuAlloc</code> (but fused). We
-start by unfolding the equality:</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>loop (<span class="dt">Unfold</span> psi s0) <span class="ot">=</span> <span class="dt">Mu</span> <span class="op">$</span> \phi <span class="ot">-&gt;</span> (fixFold phi <span class="op">.</span> fixUnfold psi) s0</span></code></pre></div>
-<p>Then we give a name to <code>fixFold phi . fixUnfold psi</code> and calculate:</p>
-<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>go <span class="ot">=</span> fixFold phi <span class="op">.</span> fixUnfold psi</span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi) <span class="op">.</span> out <span class="op">.</span> <span class="dt">In</span> <span class="op">.</span> <span class="fu">fmap</span> (fixUnfold psi) <span class="op">.</span> psi</span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi) <span class="op">.</span> <span class="fu">fmap</span> (fixUnfold psi) <span class="op">.</span> psi</span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi <span class="op">.</span> fixUnfold psi) <span class="op">.</span> psi</span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> go <span class="op">.</span> psi</span></code></pre></div>
+start by η-expanding:</p>
+<div class="sourceCode" id="cb15"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>loop (<span class="dt">Unfold</span> psi s0) <span class="ot">=</span> muWalk <span class="op">$</span> nuAlloc (<span class="dt">Unfold</span> psi s0)</span></code></pre></div>
+<p>Unfolding the definitions of <code>muWalk</code> and <code>nuAlloc</code> gives:</p>
+<div class="sourceCode" id="cb16"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>loop (<span class="dt">Unfold</span> psi s0) <span class="ot">=</span> <span class="dt">Mu</span> <span class="op">$</span> \phi <span class="ot">-&gt;</span> (fixFold phi <span class="op">.</span> fixUnfold psi) s0</span></code></pre></div>
+<p>Then we let <code>go = fixFold phi . fixUnfold psi</code> and calculate:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>go <span class="ot">=</span> fixFold phi <span class="op">.</span> fixUnfold psi</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi) <span class="op">.</span> out <span class="op">.</span> <span class="dt">In</span> <span class="op">.</span> <span class="fu">fmap</span> (fixUnfold psi) <span class="op">.</span> psi</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi) <span class="op">.</span> <span class="fu">fmap</span> (fixUnfold psi) <span class="op">.</span> psi</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> (fixFold phi <span class="op">.</span> fixUnfold psi) <span class="op">.</span> psi</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>   <span class="ot">=</span> phi <span class="op">.</span> <span class="fu">fmap</span> go <span class="op">.</span> psi</span></code></pre></div>
+<p>QED.</p>
 <h1 id="conclusion">Conclusion</h1>
 <p>In summary, my recommendations for getting reliable and flexible
 fusion are to:</p>
 <ol type="1">
-<li><p>Roll out you own non-recursive types, or use a library which
+<li><p>Roll out your own non-recursive types, or use a library which
 internally use non-recursive types;</p></li>
 <li><p>Select representations accordingly to the the behavior that they
 should have (master/slave). Library writer should expose both

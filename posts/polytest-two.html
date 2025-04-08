@@ -31,7 +31,7 @@
 </div>
 <div class="info">
     
-        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>
+        Tags: <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html" rel="tag">Haskell</a>
     
 </div>
 
@@ -67,11 +67,11 @@ bug-free.</p>
 <table>
 <tbody>
 <tr class="odd">
-<td><span class="math inline"> ∼ (<em>A</em>→<em>B</em>)</span></td>
-<td><span class="math inline"> = <em>A</em> ×  ∼ <em>B</em></span></td>
+<td><span class="math inline"> ∼ (<em>A</em> → <em>B</em>)</span></td>
+<td><span class="math inline"> = <em>A</em>× ∼ <em>B</em></span></td>
 </tr>
 <tr class="even">
-<td><span class="math inline"> ∼ (<em>A</em>×<em>B</em>)</span></td>
+<td><span class="math inline"> ∼ (<em>A</em> × <em>B</em>)</span></td>
 <td><span class="math inline"> = <em>A</em> →  ∼ <em>B</em></span></td>
 </tr>
 <tr class="odd">
@@ -140,7 +140,7 @@ structural induction over types, as follows:</p>
 </tr>
 <tr class="even">
 <td><span class="math inline">⟦<em>A</em> → <em>B</em>⟧<sub><em>Γ</em></sub></span></td>
-<td><span class="math inline"> = ⟦ ∼ <em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧<sub>(<em>Γ</em>,<em>x</em>:<em>A</em>)</sub></span></td>
+<td><span class="math inline"> = ⟦ ∼ <em>A</em>⟧<sub><em>Γ</em></sub> ∪ ⟦<em>B</em>⟧<sub>(<em>Γ</em>, <em>x</em> : <em>A</em>)</sub></span></td>
 </tr>
 <tr class="odd">
 <td><span class="math inline">⟦<em>α</em>⟧<sub><em>Γ</em></sub></span></td>
@@ -175,24 +175,24 @@ context <span class="math inline"><em>Γ</em></span>. When we reach a type varia
 (<span class="math inline"><em>κ</em></span>) allowing to store the whole context. Crucially, to deal with a
 function type <span class="math inline"><em>A</em> → <em>B</em></span>, we dualize the domain <span class="math inline"><em>A</em></span> in the recursive
 case.</p>
-<p>Example: consider <span class="math inline"><em>p</em> : ∀<em>α</em>.(<em>α</em>→<em>α</em>) → <em>α</em> → ⊥</span>. We should generate <span class="math inline"><em>e</em> : ∃<em>α</em>.(<em>α</em>→<em>α</em>) × <em>α</em> × 1</span>. We obtain two constructors, as follows:</p>
+<p>Example: consider <span class="math inline"><em>p</em> : ∀<em>α</em>.(<em>α</em> → <em>α</em>) → <em>α</em> → ⊥</span>. We should generate <span class="math inline"><em>e</em> : ∃<em>α</em>.(<em>α</em> → <em>α</em>) × <em>α</em> × 1</span>. We obtain two constructors, as follows:</p>
 <table>
 <tbody>
 <tr class="odd">
-<td><span class="math inline">⟦(<em>α</em>→<em>α</em>) × <em>α</em> × 1⟧</span></td>
-<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ ⟦<em>α</em>⟧ ∪  × ⟦1⟧</span></td>
+<td><span class="math inline">⟦(<em>α</em> → <em>α</em>) × <em>α</em> × 1⟧</span></td>
+<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ ⟦<em>α</em>⟧ ∪ ×⟦1⟧</span></td>
 </tr>
 <tr class="even">
 <td></td>
-<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ {<em>κ</em>₂ : <em>α</em>} ∪  × {}</span></td>
+<td><span class="math inline"> = ⟦<em>α</em> → <em>α</em>⟧ ∪ {<em>κ</em>₂ : <em>α</em>} ∪ ×{}</span></td>
 </tr>
 <tr class="odd">
 <td></td>
-<td><span class="math inline"> = ⟦ ∼ <em>α</em>⟧ ∪ ⟦<em>α</em>⟧<sub>(<em>x</em>:<em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
+<td><span class="math inline"> = ⟦ ∼ <em>α</em>⟧ ∪ ⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
 </tr>
 <tr class="even">
 <td></td>
-<td><span class="math inline"> = {} ∪ ⟦<em>α</em>⟧<sub>(<em>x</em>:<em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
+<td><span class="math inline"> = {} ∪ ⟦<em>α</em>⟧<sub>(<em>x</em> : <em>α</em>)</sub> ∪ {<em>κ</em>₂ : <em>α</em>}</span></td>
 </tr>
 <tr class="odd">
 <td></td>

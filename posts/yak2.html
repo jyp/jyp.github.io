@@ -33,7 +33,7 @@
 </div>
 <div class="info">
     
-        Tags: <a title="All pages tagged 'Keyboards'." href="../tags/Keyboards.html">Keyboards</a>, <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html">Haskell</a>
+        Tags: <a title="All pages tagged 'Keyboards'." href="../tags/Keyboards.html" rel="tag">Keyboards</a>, <a title="All pages tagged 'Haskell'." href="../tags/Haskell.html" rel="tag">Haskell</a>
     
 </div>
 
@@ -42,8 +42,8 @@
 build my own keyboard. More about the goals <a href="./yak1.html">here</a>. In this post I’ll
 give a glimpse of the design process and technologies involved.</p>
 <figure>
-<img src="../images/Yak-Perspective.jpg" alt="A shot of the Yak" />
-<figcaption aria-hidden="true">A shot of the Yak</figcaption>
+<img src="../images/Yak-Perspective.jpg" />
+<figcaption>A shot of the Yak</figcaption>
 </figure>
 <h1 id="the-technology">The technology</h1>
 <p>Of course I won’t be designing a keyboard in a WISIWIG CAD software (I
@@ -183,8 +183,8 @@ this point I have generated a model of keycaps and switches, which
 allows me to check that keyswitches do not run into each other, and
 likewise for keycaps, as they are pressed.</p>
 <figure>
-<img src="../images/yak-keys.png" alt="Preview of the layout of keyswitches" />
-<figcaption aria-hidden="true">Preview of the layout of keyswitches</figcaption>
+<img src="../images/yak-keys.png" />
+<figcaption>Preview of the layout of keyswitches</figcaption>
 </figure>
 <h1 id="the-mounting-frame">The mounting frame</h1>
 <p>When content with the design, it’s time to build a model of the frame,
@@ -203,15 +203,15 @@ back to the drawing board.</p>
 <div class="sourceCode" id="cb4"><pre class="sourceCode haskell"><code class="sourceCode haskell"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="ot">frame ::</span> (<span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Int</span> <span class="ot">-&gt;</span> <span class="dt">Part3</span> <span class="dt">ModelPoints</span> <span class="dt">R</span>) <span class="ot">-&gt;</span> <span class="dt">Part</span> '[] <span class="dt">V3'</span> <span class="dt">R</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>frame base_ <span class="ot">=</span> ug (webbing (corners (rectangle <span class="op">$</span> <span class="fu">pure</span> segmentHeight) (hand base_)))</span></code></pre></div>
 <figure>
-<img src="../images/yak-frame.png" alt="The final Yak frame model" />
-<figcaption aria-hidden="true">The final Yak frame model</figcaption>
+<img src="../images/yak-frame.png" />
+<figcaption>The final Yak frame model</figcaption>
 </figure>
 <p>One point about the mounts: the tolerance for the hole will vary with
 the characteristics of the manufacturing process. (Prototypes to the
 rescue!)</p>
 <figure>
-<img src="../images/yak-frame-phy.jpg" alt="Physical realisation" />
-<figcaption aria-hidden="true">Physical realisation</figcaption>
+<img src="../images/yak-frame-phy.jpg" />
+<figcaption>Physical realisation</figcaption>
 </figure>
 <h1 id="the-rest">The rest</h1>
 <p>What remains is to build an enclosure, so that the frame can rest on
